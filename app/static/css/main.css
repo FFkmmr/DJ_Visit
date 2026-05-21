@@ -29,6 +29,8 @@
   /* Layout */
   --header-height: 114px;
   --design-width: 1920px;
+  --marquee-item-width: 0px;
+  --tagline-width: 0px;
 
   /* Breakpoints (for reference in @media queries) */
   --bp-desktop: 1920px;

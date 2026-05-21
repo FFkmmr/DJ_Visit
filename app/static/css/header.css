@@ -19,6 +19,9 @@
 
 .header__inner {
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   max-width: var(--design-width);
   height: 100%;
@@ -27,15 +30,9 @@
 
 /* ─── Logo (centered absolutely per Figma) ──────────────────────────────── */
 .header__logo {
-  position: absolute;
-  left: 50%;
-  top: 16px;
-  transform: translateX(-50%);
   display: block;
   width: 116px;
   height: 82px;
-  z-index: 2;
-  transition: opacity var(--transition-fast);
 }
 
 .header__logo:hover {
@@ -50,9 +47,7 @@
 
 /* ─── Nav (absolute, left:477 top:45 width:1069 per Figma) ─────────────── */
 .header__nav {
-  position: absolute;
-  left: 477px;
-  top: 45px;
+  
   width: 1069px;
   z-index: 1;
 }
@@ -147,7 +142,7 @@
     left: auto;
     right: 60px;
     width: auto;
-    max-width: calc(100% - 200px);
+    max-width: calc(100% - 110px);
   }
 
   .header__links {

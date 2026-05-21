@@ -4,17 +4,18 @@
             <ul class="header__links">
                 <li><a href="#slide-1" class="header__link" @click="open = false">Главная</a></li>
                 <li><a href="#slide-2" class="header__link" @click="open = false">Почему я?</a></li>
+                <a href="#slide-1" class="header__logo" aria-label="Дмитрий Жульков — на главную">
+                    <img src="{{ url_for('static', filename='img/logo-dj.png') }}"
+                        alt="Дмитрий Жульков"
+                        width="116"
+                        height="82">
+                </a>
                 <li><a href="#slide-3" class="header__link" @click="open = false">Портфолио</a></li>
                 <li><a href="#footer" class="header__link" @click="open = false">Связь со мной</a></li>
             </ul>
         </nav>
 
-        <a href="#slide-1" class="header__logo" aria-label="Дмитрий Жульков — на главную">
-            <img src="{{ url_for('static', filename='img/logo-dj.png') }}"
-                 alt="Дмитрий Жульков"
-                 width="116"
-                 height="82">
-        </a>
+        
 
         <button class="header__burger"
                 :class="{ 'is-open': open }"
