@@ -1,0 +1,229 @@
+/* ============================================================================
+   SLIDE-4.CSS — Актёрский опыт (Figma node 90:93, 1475×567)
+   Source of truth: CLAUDE.md Phase 2 Figma Design Context
+   ============================================================================ */
+
+.slide-4 {
+  position: relative;
+  width: 100%;
+  background-color: var(--color-black);
+}
+
+.slide-4__container {
+  max-width: 1475px;
+  margin: 0 auto;
+  padding: 100px 24px 80px;
+  display: flex;
+  gap: 35px;
+  align-items: flex-start;
+}
+
+/* ── Left column ──────────────────────────────────────────────────────── */
+.slide-4__left {
+  flex: 0 0 648px;
+  max-width: 648px;
+}
+
+.slide-4__title {
+  margin: 0;
+  font-family: var(--font-oswald);
+  font-size: 96px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--color-white);
+}
+
+.slide-4__title-line {
+  display: block;
+}
+
+.slide-4__lead {
+  margin: 60px 0 0;
+  font-family: var(--font-onest);
+  font-size: 24px;
+  font-weight: 200;
+  line-height: 30px;
+  color: var(--color-white);
+  max-width: 600px;
+}
+
+.slide-4__help {
+  margin: 60px 0 0;
+  font-family: var(--font-oswald);
+  font-size: 32px;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--color-white);
+}
+
+.slide-4__help-word {
+  color: var(--color-white);
+}
+
+.slide-4__help-colon {
+  color: var(--color-orange);
+  font-weight: 200;
+}
+
+.slide-4__list {
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slide-4__list-item {
+  display: flex;
+  align-items: center;
+  gap: 21px;
+  padding: 18px 0;
+  border-top: 1px solid var(--color-white);
+}
+
+.slide-4__list-item:last-child {
+  border-bottom: 1px solid var(--color-white);
+}
+
+.slide-4__list-dash {
+  display: block;
+  width: 44px;
+  height: 0;
+  border-top: 1px solid var(--color-white);
+  flex-shrink: 0;
+  visibility: hidden; /* The borders above provide the visual line; this preserves layout. */
+}
+
+.slide-4__list-text {
+  font-family: var(--font-onest);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 30px;
+  color: var(--color-white);
+}
+
+/* ── Right column ─────────────────────────────────────────────────────── */
+.slide-4__right {
+  flex: 1 1 auto;
+  max-width: 792px;
+}
+
+.slide-4__image {
+  width: 100%;
+  max-width: 792px;
+  height: 340px;
+  object-fit: cover;
+  display: block;
+}
+
+.slide-4__note {
+  margin: 30px 0 0;
+  max-width: 770px;
+  font-family: var(--font-onest);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 30px;
+  color: var(--color-white);
+}
+
+.slide-4__education {
+  margin: 50px 0 0;
+  line-height: 1.2;
+}
+
+.slide-4__edu-label {
+  font-family: var(--font-oswald);
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--color-orange);
+}
+
+.slide-4__edu-colon {
+  font-family: var(--font-onest);
+  font-size: 32px;
+  font-weight: 200;
+  color: var(--color-orange);
+}
+
+.slide-4__edu-value,
+.slide-4__edu-dot {
+  font-family: var(--font-onest);
+  font-size: 27px;
+  font-weight: 200;
+  color: var(--color-white);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 1440px) {
+  .slide-4__container {
+    padding: 80px 32px 60px;
+  }
+
+  .slide-4__left {
+    flex: 0 0 50%;
+  }
+
+  .slide-4__title {
+    font-size: 80px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .slide-4__container {
+    flex-direction: column;
+    padding: 60px 24px;
+    gap: 48px;
+  }
+
+  .slide-4__left,
+  .slide-4__right {
+    flex: 1 1 auto;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .slide-4__image {
+    height: auto;
+    aspect-ratio: 792 / 340;
+  }
+}
+
+@media (max-width: 768px) {
+  .slide-4__container {
+    padding: 40px 16px;
+  }
+
+  .slide-4__title {
+    font-size: clamp(48px, 10vw, 96px);
+    line-height: 1.05;
+  }
+
+  .slide-4__lead {
+    font-size: 18px;
+    line-height: 26px;
+    margin-top: 40px;
+  }
+
+  .slide-4__help {
+    font-size: 24px;
+    margin-top: 40px;
+  }
+
+  .slide-4__list-text {
+    font-size: 18px;
+    line-height: 26px;
+  }
+
+  .slide-4__note {
+    font-size: 18px;
+    line-height: 26px;
+  }
+
+  .slide-4__edu-label,
+  .slide-4__edu-colon {
+    font-size: 24px;
+  }
+
+  .slide-4__edu-value,
+  .slide-4__edu-dot {
+    font-size: 20px;
+  }
+}

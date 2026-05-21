@@ -1,0 +1,154 @@
+/* ============================================================================
+   MAIN.CSS — Reset, Design Tokens (from Figma), Global Layout
+   Source of truth: docs/02-tech-stack.md + Figma file QvNZVNTQS5aUMiAW4IG30C
+   ============================================================================ */
+
+/* ─── Design Tokens (Figma) ─────────────────────────────────────────────── */
+:root {
+  /* Colors */
+  --color-black: #000000;
+  --color-white: #FFFFFF;
+  --color-white-50: rgba(255, 255, 255, 0.5);
+  --color-orange: #FFBB00;
+  --color-gray-text: #797979;
+  --color-dark-line: #202020;
+  --color-mid-line: #404040;
+  --color-filter-inactive-bg: rgba(0, 0, 0, 0.56);
+  --color-white-10: rgba(255, 255, 255, 0.1);
+  --color-card-shadow: rgba(0, 0, 0, 0.29);
+  --color-info-bg: rgba(0, 0, 0, 0.29);
+  --color-tagline-bg: #D9D9D9;
+
+  /* Typography — Google Fonts loaded in index.html */
+  --font-oswald: 'Oswald', 'Arial Narrow', sans-serif;
+  --font-onest: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-raleway: 'Raleway', -apple-system, sans-serif;
+  --font-surfer: 'Original Surfer', cursive;
+  --font-jura: 'Jura', sans-serif;
+
+  /* Layout */
+  --header-height: 114px;
+  --design-width: 1920px;
+
+  /* Breakpoints (for reference in @media queries) */
+  --bp-desktop: 1920px;
+  --bp-large: 1440px;
+  --bp-tablet: 1024px;
+  --bp-mobile: 768px;
+  --bp-small: 480px;
+
+  /* Z-index scale */
+  --z-bg: 0;
+  --z-content: 1;
+  --z-lines: 2;
+  --z-curve: 3;
+  --z-wave: 3;
+  --z-info: 4;
+  --z-marquee: 5;
+  --z-header: 1000;
+
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+}
+
+/* ─── CSS Reset ─────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-onest);
+  background-color: var(--color-black);
+  color: var(--color-white);
+  line-height: 1.4;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Removes default focus ring but keeps it for keyboard navigation */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 2px;
+}
+
+/* ─── Global Layout ─────────────────────────────────────────────────────── */
+#app {
+  width: 100%;
+  background-color: var(--color-black);
+}
+
+.main {
+  width: 100%;
+}
+
+.section {
+  position: relative;
+  width: 100%;
+  max-width: 1920px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow: hidden;
+}
+
+/* Utility: visually hidden (for screen readers) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

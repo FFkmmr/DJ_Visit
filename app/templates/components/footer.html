@@ -1,0 +1,84 @@
+<footer class="footer" id="footer" aria-label="Контакты">
+    <div class="footer__top">
+        <div class="footer__cta">
+            <h2 class="footer__cta-title">
+                ДАВАЙТЕ СОЗДАДИМ ПРОЕКТ,<br>
+                КОТОРЫЙ БУДЕТ РАБОТАТЬ
+            </h2>
+            <p class="footer__cta-sub">
+                Открыт к новым проектам, интересным идеям и долгосрочному сотрудничеству.
+            </p>
+        </div>
+
+        <div class="footer__divider-vertical" aria-hidden="true"></div>
+
+        <div class="footer__contacts">
+            <h3 class="footer__contacts-title">КОНТАКТЫ</h3>
+            <ul class="footer__contacts-list">
+                <li class="footer__contact">
+                    <img src="{{ url_for('static', filename='img/icon-email.png') }}"
+                         alt=""
+                         class="footer__contact-icon"
+                         aria-hidden="true"
+                         width="32"
+                         height="32">
+                    <a href="mailto:zhulkovdmitrii1993@gmail.com" class="footer__contact-link">
+                        zhulkovdmitrii1993@gmail.com
+                    </a>
+                </li>
+                <li class="footer__contact">
+                    <img src="{{ url_for('static', filename='img/icon-phone.png') }}"
+                         alt=""
+                         class="footer__contact-icon"
+                         aria-hidden="true"
+                         width="32"
+                         height="32">
+                    <span class="footer__contact-link">+7 (985) 615-50-91</span>
+                </li>
+                <li class="footer__contact">
+                    <img src="{{ url_for('static', filename='img/icon-telegram.png') }}"
+                         alt=""
+                         class="footer__contact-icon"
+                         aria-hidden="true"
+                         width="32"
+                         height="32">
+                    <a href="https://t.me/film_directorZhulkov"
+                       class="footer__contact-link"
+                       target="_blank"
+                       rel="noopener">
+                        t.me/film_directorZhulkov
+                    </a>
+                </li>
+                <li class="footer__contact">
+                    <img src="{{ url_for('static', filename='img/icon-youtube.png') }}"
+                         alt=""
+                         class="footer__contact-icon"
+                         aria-hidden="true"
+                         width="35"
+                         height="35">
+                    <a href="https://youtube.com/@ZhulkovDmitrii"
+                       class="footer__contact-link"
+                       target="_blank"
+                       rel="noopener">
+                        youtube.com/@ZhulkovDmitrii
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer__divider-horizontal" aria-hidden="true"></div>
+
+    <div class="footer__bottom">
+        <p class="footer__copyright">© 2026 Mitsuhano — Design &amp; Development</p>
+
+        <a href="#slide-1" class="footer__logo" aria-label="К началу страницы">
+            <img src="{{ url_for('static', filename='img/logo-dj.png') }}"
+                 alt="Дмитрий Жульков — логотип"
+                 width="70"
+                 height="49">
+        </a>
+
+        <p class="footer__tagline">Сделано с вниманием к деталям и любовью к кино.</p>
+    </div>
+</footer>

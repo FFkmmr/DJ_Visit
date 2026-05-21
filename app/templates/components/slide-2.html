@@ -1,0 +1,30 @@
+<section class="section slide-2" id="slide-2" aria-label="Почему я">
+    <!-- Layer 1: full background photo -->
+    <img src="{{ url_for('static', filename='img/why-me-bg.png') }}"
+         alt=""
+         class="slide-2__bg"
+         aria-hidden="true">
+
+    <!-- Layer 2: right photo block (black bg with photo) -->
+    <div class="slide-2__photo-block">
+        <img src="{{ url_for('static', filename='img/why-me-photo.png') }}"
+             alt="Дмитрий Жульков"
+             class="slide-2__photo">
+    </div>
+
+    <!-- Layer 3: content block (orange bar + texts) -->
+    <div class="slide-2__content">
+        <div class="slide-2__orange-bar" aria-hidden="true"></div>
+
+        <h2 class="slide-2__heading">КОГДА КО МНЕ<br>ПРИХОДЯТ</h2>
+
+        <p class="slide-2__typing" id="typing-section">
+            <span class="typing-text" id="typing-text"></span><span class="typing-cursor" aria-hidden="true">|</span>
+        </p>
+
+        <p class="slide-2__desc">
+            Ценим хорошую коммуникацию, внимательно выслушиваем пожелания,
+            предлагаем эффективные решения и вместе добиваемся поставленных результатов
+        </p>
+    </div>
+</section>

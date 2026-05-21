@@ -1,0 +1,65 @@
+<section class="section slide-1" id="slide-1" aria-label="Главная — Дмитрий Жульков">
+    <!-- Layer 1: background image -->
+    <img src="{{ url_for('static', filename='img/hero-bg.png') }}"
+         alt=""
+         class="slide-1__bg"
+         aria-hidden="true">
+
+    <!-- Layer 2: producer photo (left) -->
+    <img src="{{ url_for('static', filename='img/producer-photo.png') }}"
+         alt="Дмитрий Жульков — портрет"
+         class="slide-1__photo">
+
+    <!-- Layer 3: decorative SVG lines -->
+    <img src="{{ url_for('static', filename='img/hero-lines.svg') }}"
+         alt=""
+         class="slide-1__lines"
+         aria-hidden="true">
+
+    <!-- Layer 4: bottom wave SVG -->
+    <img src="{{ url_for('static', filename='img/wave-bg.svg') }}"
+         alt=""
+         class="slide-1__wave"
+         aria-hidden="true">
+
+    <!-- Layer 5: curve SVG -->
+    <img src="{{ url_for('static', filename='img/wave-curve.svg') }}"
+         alt=""
+         class="slide-1__curve"
+         aria-hidden="true">
+
+    <!-- Layer 6: info block (name + role + tagline) -->
+    <div class="slide-1__info">
+        <h1 class="slide-1__name">Дмитрий Жульков</h1>
+        <p class="slide-1__role">Режиссёр / Продюсер</p>
+
+        <div class="slide-1__tagline">
+            <div class="marquee__item--tagline">ВИДЕО, ГДЕ ЧЕЛОВЕК ВАЖНЕЕ ФОРМАТА <span class="marquee__divider">●</span></div>
+            <div class="marquee__item--tagline">ВИДЕО, ГДЕ ЧЕЛОВЕК ВАЖНЕЕ ФОРМАТА <span class="marquee__divider">●</span></div>
+        </div>
+    </div>
+
+    <!-- Layer 7: bottom marquee — infinite scroll with animation-delay -->
+    <div class="slide-1__marquee">
+        <div class="marquee__item marquee__item--bottom">
+            ПРОДАКШН <span class="marquee__star">✦</span>
+            СЦЕНАРИЙ <span class="marquee__star">✦</span>
+            КРЕАТИВ <span class="marquee__star">✦</span>
+            СЪЁМКА <span class="marquee__star">✦</span>
+            РЕЖИССУРА <span class="marquee__star">✦</span>
+            ПОСТПРОДАКШН <span class="marquee__star">✦</span>
+            КАСТИНГ <span class="marquee__star">✦</span>
+            РАБОТА С АКТЁРОМ <span class="marquee__star">✦</span>
+        </div>
+        <div class="marquee__item marquee__item--bottom">
+            ПРОДАКШН <span class="marquee__star">✦</span>
+            СЦЕНАРИЙ <span class="marquee__star">✦</span>
+            КРЕАТИВ <span class="marquee__star">✦</span>
+            СЪЁМКА <span class="marquee__star">✦</span>
+            РЕЖИССУРА <span class="marquee__star">✦</span>
+            ПОСТПРОДАКШН <span class="marquee__star">✦</span>
+            КАСТИНГ <span class="marquee__star">✦</span>
+            РАБОТА С АКТЁРОМ <span class="marquee__star">✦</span>
+        </div>
+    </div>
+</section>

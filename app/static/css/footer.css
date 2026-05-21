@@ -1,0 +1,222 @@
+/* ============================================================================
+   FOOTER.CSS — Контакты (Figma node 81:28, 1920×541)
+   Source of truth: CLAUDE.md Phase 2 Figma Design Context
+   ============================================================================ */
+
+.footer {
+  position: relative;
+  width: 100%;
+  max-width: 1920px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: var(--color-black);
+  color: var(--color-white);
+}
+
+/* ── Top area: CTA + contacts ─────────────────────────────────────────── */
+.footer__top {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 60px 418px 80px;
+  gap: 48px;
+}
+
+.footer__cta {
+  flex: 0 0 auto;
+  max-width: 460px;
+}
+
+.footer__cta-title {
+  margin: 0;
+  font-family: var(--font-oswald);
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 53px;
+  color: var(--color-white);
+}
+
+.footer__cta-sub {
+  margin: 34px 0 0;
+  max-width: 457px;
+  font-family: var(--font-onest);
+  font-size: 20px;
+  font-weight: 200;
+  line-height: 33px;
+  color: var(--color-white);
+}
+
+/* Vertical separator between CTA and contacts */
+.footer__divider-vertical {
+  width: 1px;
+  align-self: stretch;
+  min-height: 312px;
+  background-color: var(--color-mid-line);
+}
+
+.footer__contacts {
+  flex: 0 0 auto;
+}
+
+.footer__contacts-title {
+  margin: 0 0 44px;
+  font-family: var(--font-oswald);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 33px;
+  color: var(--color-white);
+}
+
+.footer__contacts-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 27px;
+}
+
+.footer__contact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer__contact-icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.footer__contact-link {
+  font-family: var(--font-onest);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 33px;
+  color: var(--color-white);
+  transition: color var(--transition-fast);
+}
+
+a.footer__contact-link:hover {
+  color: var(--color-orange);
+}
+
+/* ── Horizontal separator ─────────────────────────────────────────────── */
+.footer__divider-horizontal {
+  width: 100%;
+  height: 1px;
+  background-color: var(--color-dark-line);
+}
+
+/* ── Bottom bar ───────────────────────────────────────────────────────── */
+.footer__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 20px;
+  gap: 24px;
+}
+
+.footer__copyright {
+  margin: 0;
+  font-family: var(--font-jura);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-gray-text);
+}
+
+.footer__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer__logo img {
+  width: 70px;
+  height: 49px;
+  object-fit: contain;
+}
+
+.footer__tagline {
+  margin: 0;
+  text-align: right;
+  font-family: var(--font-jura);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-gray-text);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 1600px) {
+  .footer__top {
+    padding: 60px 120px 80px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .footer__top {
+    padding: 60px 64px 80px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .footer__top {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 40px 24px 60px;
+    gap: 40px;
+  }
+
+  .footer__divider-vertical {
+    display: none;
+  }
+
+  .footer__cta,
+  .footer__contacts {
+    max-width: 100%;
+  }
+
+  .footer__cta-title {
+    font-size: 32px;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer__bottom {
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px 16px;
+    text-align: center;
+  }
+
+  .footer__copyright,
+  .footer__tagline {
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .footer__cta-title {
+    font-size: 26px;
+    line-height: 1.25;
+  }
+
+  .footer__cta-sub {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-top: 20px;
+  }
+
+  .footer__contacts-title {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .footer__contact-link {
+    font-size: 14px;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+}

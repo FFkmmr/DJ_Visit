@@ -1,0 +1,239 @@
+/* ============================================================================
+   SLIDE-5.CSS — Как рождается результат (Figma node 90:92, 1790×290)
+   Source of truth: CLAUDE.md Phase 2 Figma Design Context
+   ============================================================================ */
+
+.slide-5 {
+  position: relative;
+  width: 100%;
+  background-color: var(--color-black);
+  padding: 80px 65px;
+}
+
+.slide-5__container {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  max-width: 1790px;
+  margin: 0 auto;
+}
+
+/* ── Intro (left) ─────────────────────────────────────────────────────── */
+.slide-5__intro {
+  flex: 0 0 465px;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+.slide-5__title {
+  margin: 0;
+  font-family: var(--font-oswald);
+  font-size: 64px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.slide-5__title-white {
+  color: var(--color-white);
+}
+
+.slide-5__title-orange {
+  color: var(--color-orange);
+}
+
+.slide-5__caption {
+  margin: 0;
+  font-family: var(--font-onest);
+  font-size: 24px;
+  font-weight: 100;
+  line-height: 30px;
+  letter-spacing: 0.09em;
+  color: var(--color-white);
+}
+
+/* ── Vertical separator between intro and steps ───────────────────────── */
+.slide-5__separator {
+  flex: 0 0 1px;
+  align-self: center;
+  width: 1px;
+  height: 120px;
+  background-color: var(--color-white-50);
+  margin: 0 50px;
+}
+
+/* ── Steps (right) ────────────────────────────────────────────────────── */
+.slide-5__steps {
+  flex: 1 1 auto;
+  display: flex;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.slide-5__step {
+  flex: 1 1 0;
+  min-width: 0;
+  position: relative;
+  padding: 0 20px;
+  border-left: 1px solid var(--color-white-50);
+  min-height: 287px;
+  display: flex;
+  flex-direction: column;
+}
+
+.slide-5__step:first-child {
+  border-left: none;
+}
+
+.slide-5__step-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 0 0 33px;
+}
+
+.slide-5__step-num {
+  font-family: var(--font-oswald);
+  font-size: 53px;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: 0.09em;
+  white-space: nowrap;
+}
+
+.step-num-zero {
+  color: var(--color-orange);
+}
+
+.step-num-digit {
+  color: var(--color-white);
+}
+
+.slide-5__step-icon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.slide-5__step-line {
+  width: 202px;
+  max-width: 100%;
+  margin: 30px auto 0;
+  border-top: 1px solid var(--color-white-50);
+}
+
+.slide-5__step-desc {
+  margin: 24px auto 0;
+  max-width: 202px;
+  font-family: var(--font-onest);
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 22px;
+  letter-spacing: 0.03em;
+  color: var(--color-white);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 1440px) {
+  .slide-5 {
+    padding: 80px 40px;
+  }
+
+  .slide-5__separator {
+    margin: 0 32px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .slide-5__steps {
+    flex-wrap: wrap;
+    gap: 24px 0;
+  }
+
+  .slide-5__step {
+    flex: 0 0 33.333%;
+    border-left: 1px solid var(--color-white-50);
+  }
+
+  .slide-5__step:nth-child(3n + 1) {
+    border-left: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .slide-5 {
+    padding: 60px 24px;
+  }
+
+  .slide-5__container {
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .slide-5__intro {
+    flex: 1 1 auto;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .slide-5__separator {
+    display: none;
+  }
+
+  .slide-5__steps {
+    width: 100%;
+  }
+
+  .slide-5__step {
+    flex: 0 0 50%;
+    padding: 0 16px;
+    min-height: auto;
+    padding-bottom: 24px;
+  }
+
+  .slide-5__step:nth-child(3n + 1) {
+    border-left: 1px solid var(--color-white-50);
+  }
+
+  .slide-5__step:nth-child(odd) {
+    border-left: none;
+  }
+
+  .slide-5__step:nth-child(even) {
+    border-left: 1px solid var(--color-white-50);
+  }
+}
+
+@media (max-width: 768px) {
+  .slide-5__title {
+    font-size: clamp(36px, 8vw, 64px);
+  }
+
+  .slide-5__caption {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .slide-5__step-num {
+    font-size: 40px;
+  }
+
+  .slide-5__step-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .slide-5__step-top {
+    padding-left: 12px;
+  }
+
+  .slide-5__step-desc {
+    font-size: 16px;
+    line-height: 20px;
+  }
+}

@@ -1,0 +1,41 @@
+<header class="header" id="header" x-data="{ open: false }">
+    <div class="header__inner">
+        <nav class="header__nav" aria-label="Основная навигация">
+            <ul class="header__links">
+                <li><a href="#slide-1" class="header__link" @click="open = false">Главная</a></li>
+                <li><a href="#slide-2" class="header__link" @click="open = false">Почему я?</a></li>
+                <li><a href="#slide-3" class="header__link" @click="open = false">Портфолио</a></li>
+                <li><a href="#footer" class="header__link" @click="open = false">Связь со мной</a></li>
+            </ul>
+        </nav>
+
+        <a href="#slide-1" class="header__logo" aria-label="Дмитрий Жульков — на главную">
+            <img src="{{ url_for('static', filename='img/logo-dj.png') }}"
+                 alt="Дмитрий Жульков"
+                 width="116"
+                 height="82">
+        </a>
+
+        <button class="header__burger"
+                :class="{ 'is-open': open }"
+                @click="open = !open"
+                :aria-expanded="open.toString()"
+                aria-controls="mobile-menu"
+                aria-label="Меню">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <ul class="header__mobile-menu"
+            id="mobile-menu"
+            x-show="open"
+            x-transition.opacity
+            x-cloak>
+            <li><a href="#slide-1" class="header__mobile-link" @click="open = false">Главная</a></li>
+            <li><a href="#slide-2" class="header__mobile-link" @click="open = false">Почему я?</a></li>
+            <li><a href="#slide-3" class="header__mobile-link" @click="open = false">Портфолио</a></li>
+            <li><a href="#footer" class="header__mobile-link" @click="open = false">Связь со мной</a></li>
+        </ul>
+    </div>
+</header>
