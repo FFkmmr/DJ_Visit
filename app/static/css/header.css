@@ -28,11 +28,28 @@
   margin: 0 auto;
 }
 
-/* ─── Logo (centered absolutely per Figma) ──────────────────────────────── */
+/* ─── Logo ──────────────────────────────────────────────────────────────── */
 .header__logo {
   display: block;
   width: 116px;
   height: 82px;
+  flex-shrink: 0;
+  padding-left: 24px;
+  z-index: 2;
+}
+
+.header__logo::before {
+  content: '';
+  /* position: absolute; */
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 73px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 70%);
+  border-radius: 50%;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .header__logo:hover {
@@ -174,6 +191,13 @@
 }
 
 @media (max-width: 768px) {
+  .header {
+    background-color: transparent;
+  }
+
+  .header.menu-open {
+    background-color: var(--color-black);
+  }
   .header__inner {
     justify-content: space-between;
   }
@@ -181,10 +205,9 @@
     display: none;
   }
   .header__logo:nth-child(2) {
-    margin-left: 50px;
+    margin-left: 25px;
     display: block !important;
   }
-
   .header__logo {
     left: 24px;
     transform: none;

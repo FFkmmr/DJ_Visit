@@ -1,4 +1,4 @@
-<header class="header" id="header" x-data="{ open: false }" @click.away="open = false">
+<header class="header" id="header" x-data="{ open: false }" :class="{ 'menu-open': open }" @click.away="open = false">
     <div class="header__inner">
         <nav class="header__nav" aria-label="Основная навигация">
             <ul class="header__links">
@@ -20,7 +20,6 @@
                 width="116"
                 height="82">
         </a>
-
         
 
         <button class="header__burger"

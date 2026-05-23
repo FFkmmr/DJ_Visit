@@ -189,5 +189,25 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 400px) {
+  .slide-2__heading {
+    letter-spacing: 2px;
+    font-size: 43px;
+  }
+  .slide-2__I-lett,
+  .slide-2__G-lett {
+    color: black;
+  }
+  .slide-2__I-lett {
+    left: -2px;
+    position: relative;
+  }
+  .slide-2__G-lett {
+    left: 1.5px;
+    margin-right: 2px;
+    position: relative;
+  }
+  .slide-2__typing-body {
+    max-width: 220px;
+  }
 }

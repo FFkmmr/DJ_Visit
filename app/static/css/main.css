@@ -71,7 +71,7 @@ html {
 }
 
 body {
-  overflow: hidden;
+  overflow-x: hidden;
   font-family: var(--font-onest);
   background-color: var(--color-black);
   color: var(--color-white);

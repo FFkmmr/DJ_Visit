@@ -251,3 +251,11 @@
     line-height: 20px;
   }
 }
+
+@media (max-width: 368px) {
+.slide-5__step {
+  flex: 0 0 100%;
+  border-left: 0 !important;
+}
+
+}
