@@ -128,6 +128,7 @@ select {
 #app {
   width: 100%;
   background-color: var(--color-black);
+  overflow-x: hidden;
 }
 
 .main {
