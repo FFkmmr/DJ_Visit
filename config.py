@@ -1,7 +1,17 @@
 import os
+import cloudinary
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Configure Cloudinary from env var CLOUDINARY_URL
+cloudinary.config(secure=True)
+
+CLOUDINARY_VIDEOS = {
+    'main_backgr': 'https://res.cloudinary.com/dox1auiyy/video/upload/dj_visit/main_backgr.mp4',
+    'actor_backgr': 'https://res.cloudinary.com/dox1auiyy/video/upload/dj_visit/actor_backgr.mp4',
+}
+
 
 class Config:
     """Base configuration"""

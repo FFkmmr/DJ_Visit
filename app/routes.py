@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request
 import os
 import json
+from config import CLOUDINARY_VIDEOS
 
 main_bp = Blueprint('main', __name__)
 
@@ -17,8 +18,7 @@ TAG_TO_CATEGORY = {
 
 @main_bp.route('/')
 def index():
-    """Main page - one-page scroll layout"""
-    return render_template('index.html')
+    return render_template('index.html', videos=CLOUDINARY_VIDEOS)
 
 
 @main_bp.route('/api/portfolio')

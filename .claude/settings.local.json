@@ -96,7 +96,8 @@
       "Bash(FIGMA_API_KEY=figd_KZpHelzV1jPGyn5x-wSnESwh5DEHuhorsCjJzZyP npx -y figma-developer-mcp)",
       "Bash(kill %1)",
       "mcp__figma__get_figma_data",
-      "mcp__figma__download_figma_images"
+      "mcp__figma__download_figma_images",
+      "Bash(ffmpeg -i app/static/movies/main_backgr.mp4 -vcodec libx264 -crf 28 -preset fast -acodec aac -b:a 128k app/static/movies/main_backgr_compressed.mp4 -y)"
     ],
     "deny": [
       "Bash(rm:*)",
