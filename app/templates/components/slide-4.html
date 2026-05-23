@@ -3,40 +3,65 @@
         <!-- Left column -->
         <div class="slide-4__left">
             <h2 class="slide-4__title">
-                <span class="slide-4__title-line">АКТЁРСКИЙ</span>
-                <span class="slide-4__title-line">ОПЫТ</span>
+                <div>
+                    <span class="slide-4__title-line">АКТЁРСКИЙ</span>
+                    <span class="slide-4__title-line">ОПЫТ</span>
+                </div>
             </h2>
 
-            <p class="slide-4__lead">
-                Актёрское образование и работа в кино научили меня главному —
-                как сделать человека в кадре живым и убедительным.
-            </p>
+            <div class="slide-4__notes-block" style="">
+                <p class="slide-4__lead">
+                    Актёрское образование и работа в кино научили меня главному —
+                    как сделать человека в кадре живым и убедительным.
+                </p>
 
-            <p class="slide-4__help">
-                <span class="slide-4__help-word">Я ПОМОГАЮ</span><span class="slide-4__help-colon">:</span>
-            </p>
+                <p class="slide-4__note_up">
+                    Это экономит время съёмки, снижает количество дублей
+                    и даёт результат без раздувания бюджета.
+                </p>
+            </div>
 
-            <ul class="slide-4__list">
-                <li class="slide-4__list-item">
-                    <span class="slide-4__list-dash" aria-hidden="true"></span>
-                    <span class="slide-4__list-text">снять зажим</span>
-                </li>
-                <li class="slide-4__list-item">
-                    <span class="slide-4__list-dash" aria-hidden="true"></span>
-                    <span class="slide-4__list-text">понять задачу сцены</span>
-                </li>
-                <li class="slide-4__list-item">
-                    <span class="slide-4__list-dash" aria-hidden="true"></span>
-                    <span class="slide-4__list-text">не играть, а быть собой</span>
-                </li>
-            </ul>
+            <div class="slide-4__lists-block" style="display: flex; margin: 60px 0 0; gap: 30px;">
+                <div>
+                    <p class="slide-4__help">
+                        <span class="slide-4__help-word">Я ПОМОГАЮ</span><span class="slide-4__help-colon">:</span>
+                    </p>
+
+                    <ul class="slide-4__list">
+                        <li class="slide-4__list-item">
+                            <span class="slide-4__list-dash" aria-hidden="true"></span>
+                            <span class="slide-4__list-text">снять зажим</span>
+                        </li>
+                        <li class="slide-4__list-item">
+                            <span class="slide-4__list-dash" aria-hidden="true"></span>
+                            <span class="slide-4__list-text">понять задачу сцены</span>
+                        </li>
+                        <li class="slide-4__list-item">
+                            <span class="slide-4__list-dash" aria-hidden="true"></span>
+                            <span class="slide-4__list-text">не играть, а быть собой</span>
+                        </li>
+                    </ul>
+                </div>
+                <p class="slide-4__education_up" style="line-height: 40px;">
+                    <span class="slide-4__edu-label">ОБРАЗОВАНИЕ</span><span class="slide-4__edu-colon">: </span><br><span class="slide-4__edu-value">ГИТИС, актёрский факультет</span><span class="slide-4__edu-dot">.</span>
+                </p>
+
+            </div>
         </div>
 
         <!-- Right column -->
         <div class="slide-4__right">
-            <img src="{{ url_for('static', filename='img/acting-photo.png') }}"
-                 alt="Актёрский опыт — кадр со съёмки"
-                 class="slide-4__image">
+            <video class="slide-4__image slide-4__video"
+                   src="{{ url_for('static', filename='movies/actor-backgr.mp4') }}"
+                   muted
+                   loop
+                   playsinline
+                   preload="none"
+                   tabindex="-1"
+                   aria-hidden="true"
+                   disablepictureinpicture
+                   disableremoteplayback>
+            </video>
 
             <p class="slide-4__note">
                 Это экономит время съёмки, снижает количество дублей

@@ -44,7 +44,9 @@
   height: 100%;
   object-fit: contain;
 }
-
+.header__logo:nth-child(2) {
+  display: none;
+}
 /* ─── Nav (absolute, left:477 top:45 width:1069 per Figma) ─────────────── */
 .header__nav {
   
@@ -120,6 +122,14 @@
   padding: 16px 0;
 }
 
+.header__mobile-menu li {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.header__mobile-menu li:last-child {
+  border-bottom: none;
+}
+
 .header__mobile-link {
   display: block;
   font-family: var(--font-raleway);
@@ -128,6 +138,7 @@
   letter-spacing: 0.2em;
   color: var(--color-white);
   padding: 16px 24px;
+  text-align: right;
   transition: background var(--transition-fast);
 }
 
@@ -163,8 +174,15 @@
 }
 
 @media (max-width: 768px) {
+  .header__inner {
+    justify-content: space-between;
+  }
   .header__nav {
     display: none;
+  }
+  .header__logo:nth-child(2) {
+    margin-left: 50px;
+    display: block !important;
   }
 
   .header__logo {

@@ -1,9 +1,17 @@
 <section class="section slide-1" id="slide-1" aria-label="Главная — Дмитрий Жульков">
-    <!-- Layer 1: background image -->
-    <img src="{{ url_for('static', filename='img/hero-bg.png') }}"
-         alt=""
-         class="slide-1__bg"
-         aria-hidden="true">
+    <!-- Layer 1: background video -->
+    <video class="slide-1__bg"
+           src="{{ url_for('static', filename='movies/main_background.mp4') }}"
+           autoplay
+           muted
+           loop
+           playsinline
+           preload="auto"
+           tabindex="-1"
+           aria-hidden="true"
+           disablepictureinpicture
+           disableremoteplayback>
+    </video>
 
     <!-- Layer 2: producer photo (left) -->
     <img src="{{ url_for('static', filename='img/producer-photo.png') }}"

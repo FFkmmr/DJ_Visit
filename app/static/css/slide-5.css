@@ -12,6 +12,7 @@
 
 .slide-5__container {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   gap: 0;
   max-width: 1790px;
@@ -65,7 +66,10 @@
 /* ── Steps (right) ────────────────────────────────────────────────────── */
 .slide-5__steps {
   flex: 1 1 auto;
+  min-width: 0;
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 0;
   margin: 0;
   padding: 0;
@@ -74,8 +78,8 @@
 }
 
 .slide-5__step {
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 1 1 160px;
+  min-width: 160px;
   position: relative;
   padding: 0 20px;
   border-left: 1px solid var(--color-white-50);
@@ -139,13 +143,22 @@
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────── */
+
+@media (max-width: 1910px) {
+  .slide-5__separator {
+    display: none;
+  }
+  .slide-5__intro {
+    flex-direction: row;
+    flex: auto;
+    align-items: center;
+    margin-bottom: 100px;
+  }
+}
+
 @media (max-width: 1440px) {
   .slide-5 {
     padding: 80px 40px;
-  }
-
-  .slide-5__separator {
-    margin: 0 32px;
   }
 }
 
@@ -181,10 +194,6 @@
     margin-bottom: 8px;
   }
 
-  .slide-5__separator {
-    display: none;
-  }
-
   .slide-5__steps {
     width: 100%;
   }
@@ -210,6 +219,11 @@
 }
 
 @media (max-width: 768px) {
+  .slide-5__intro {
+    flex-direction: column;
+    align-items: start;
+    margin-bottom: 18px;
+  }
   .slide-5__title {
     font-size: clamp(36px, 8vw, 64px);
   }

@@ -57,7 +57,7 @@
 }
 
 .slide-4__help-word {
-  color: var(--color-white);
+  color:#FB0;
 }
 
 .slide-4__help-colon {
@@ -75,21 +75,15 @@
   display: flex;
   align-items: center;
   gap: 21px;
-  padding: 18px 0;
-  border-top: 1px solid var(--color-white);
-}
-
-.slide-4__list-item:last-child {
-  border-bottom: 1px solid var(--color-white);
+  padding: 10px 0;
 }
 
 .slide-4__list-dash {
   display: block;
   width: 44px;
-  height: 0;
-  border-top: 1px solid var(--color-white);
+  height: 1px;
+  border-top: 1px solid #FB0;
   flex-shrink: 0;
-  visibility: hidden; /* The borders above provide the visual line; this preserves layout. */
 }
 
 .slide-4__list-text {
@@ -111,9 +105,24 @@
   max-width: 792px;
   height: 340px;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
+.slide-4__video {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+.slide-4__lists-block,
+.slide-4__notes-block {
+  display: flex;
+  margin: 60px 0 0; 
+  gap: 30px;
+
+}
+  .slide-4__note_up,
 .slide-4__note {
   margin: 30px 0 0;
   max-width: 770px;
@@ -123,12 +132,21 @@
   line-height: 30px;
   color: var(--color-white);
 }
-
+.slide-4__note_up {
+  display: none;
+}
+slide-4__education_up,
 .slide-4__education {
   margin: 50px 0 0;
   line-height: 1.2;
 }
-
+.slide-4__education_up {
+  display: none;
+}
+.slide-4__help {
+  margin: 0;
+  width: 400px;
+}
 .slide-4__edu-label {
   font-family: var(--font-oswald);
   font-size: 32px;
@@ -179,7 +197,32 @@
     max-width: 100%;
     width: 100%;
   }
+  .slide-4__title {
+    display: flex;
+    justify-content: space-between;
+  }
+  .slide-4__note_up,
+  .slide-4__lead {
+    margin: 0;
+    max-width: 400px;
+  }
+  .slide-4__right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
+  }
+  .slide-4__education,
+  .slide-4__note {
+    display: none;
+  }
+  .slide-4__education_up,
+  .slide-4__note_up {
+    font-size: 24px;
+    font-weight: 200;
+    line-height: 30px;
+    display: block;
+  }
   .slide-4__image {
     height: auto;
     aspect-ratio: 792 / 340;
@@ -187,7 +230,14 @@
 }
 
 @media (max-width: 768px) {
+  .slide-4__lists-block,
+  .slide-4__notes-block {
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 15px;
+  }
   .slide-4__container {
+    margin-top: 10px;
     padding: 40px 16px;
   }
 
@@ -204,15 +254,15 @@
 
   .slide-4__help {
     font-size: 24px;
-    margin-top: 40px;
+    margin-top: 0px;
   }
-
   .slide-4__list-text {
     font-size: 18px;
     line-height: 26px;
+    padding: 5px 0;
   }
 
-  .slide-4__note {
+  .slide-4__note_up {
     font-size: 18px;
     line-height: 26px;
   }
