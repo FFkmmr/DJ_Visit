@@ -9,7 +9,7 @@ Opening/hero slide for the web business card. Features background video, wavy de
 - **Background:** Video (muted, no sound, loops, lazy-loaded)
 - **Wavy shape:** Black animated wave covering ~50% of slide, separates background from content
 - **Left side:** Photo + decorative black shape below it (scales together with wave)
-- **Right side:** Producer name + title + marquee text "ВИДЕО, ГДЕ ЧЕЛОВЕК ВАЖНЕЕ ФОРМАТА" (scrolls RTL)
+- **Right side:** Producer name + title + marquee text "ЧЕЛОВЕК ВАЖНЕЕ ФОРМАТА" (scrolls RTL)
 - **Bottom:** Marquee text with services + orange stars "Продакшн ✦ Сценарий ✦ ..." (scrolls)
 - **Line elements:** Black outside the wave, white inside the wave
 
@@ -53,7 +53,7 @@ Opening/hero slide for the web business card. Features background video, wavy de
       
       <!-- Marquee text (right to left) -->
       <div class="marquee marquee-rtl">
-        <span>"ВИДЕО, ГДЕ ЧЕЛОВЕК ВАЖНЕЕ ФОРМАТА"</span>
+        <span>"ЧЕЛОВЕК ВАЖНЕЕ ФОРМАТА"</span>
       </div>
     </div>
   </div>
