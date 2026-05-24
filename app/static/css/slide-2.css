@@ -84,7 +84,7 @@
 
 .slide-2__typing {
   position: absolute;
-  left: 59px;
+  left: 55px;
   top: 283px;
   width: 440px;
   margin: 0;
@@ -96,7 +96,7 @@
   z-index: 2;
   display: flex;
   align-items: flex-start;
-  gap: 6px;
+  gap: 13px;
 }
 
 .slide-2__typing-label {
@@ -170,7 +170,7 @@
     left: 16px;
   }
   .slide-2__typing {
-    left: 14px;
+    left: 10px;
     width: 400px;
   }
   .slide-2__desc {

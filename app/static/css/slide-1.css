@@ -406,7 +406,7 @@
 .slide-1__tagline_sm {
   display: flex;
   position: absolute;
-  bottom: 30px;
+  bottom: 50px;
 }
 .slide-1__marquee {
   display: none;
