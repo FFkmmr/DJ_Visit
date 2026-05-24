@@ -15,7 +15,7 @@ var Portfolio = (function () {
   var modalIndex = 0;
 
   var grid, filtersEl, loadMoreBtn, emptyEl;
-  var modalEl, modalOverlay, modalClose, modalPrev, modalNext;
+  var modalEl, modalOverlay, modalClose, modalPrev, modalNext, modalPrevM, modalNextM, modalCloseM;
   var modalVideo, modalTitle, modalSubtitle, modalTags, modalDesc;
 
   // ── autoplay observer ──────────────────────────────────────────────────
@@ -241,8 +241,12 @@ var Portfolio = (function () {
     modalVideo.src = item.video_url || '';
     if (item.video_url) { modalVideo.load(); modalVideo.play().catch(function () {}); }
 
-    modalPrev.disabled = idx === 0;
-    modalNext.disabled = idx === visibleIds.length - 1;
+    var isFirst = idx === 0;
+    var isLast  = idx === visibleIds.length - 1;
+    modalPrev.disabled = isFirst;
+    modalNext.disabled = isLast;
+    if (modalPrevM) modalPrevM.disabled = isFirst;
+    if (modalNextM) modalNextM.disabled = isLast;
 
     modalEl.removeAttribute('hidden');
     document.body.style.overflow = 'hidden';
@@ -276,6 +280,9 @@ var Portfolio = (function () {
     modalClose    = document.getElementById('pf-modal-close');
     modalPrev     = document.getElementById('pf-modal-prev');
     modalNext     = document.getElementById('pf-modal-next');
+    modalCloseM   = document.getElementById('pf-modal-close-m');
+    modalPrevM    = document.getElementById('pf-modal-prev-m');
+    modalNextM    = document.getElementById('pf-modal-next-m');
     modalVideo    = document.getElementById('pf-modal-video');
     modalTitle    = document.getElementById('pf-modal-title');
     modalSubtitle = document.getElementById('pf-modal-subtitle');
@@ -306,10 +313,17 @@ var Portfolio = (function () {
 
     if (modalOverlay) modalOverlay.addEventListener('click', closeModal);
     if (modalClose)   modalClose.addEventListener('click', closeModal);
+    if (modalCloseM)  modalCloseM.addEventListener('click', closeModal);
     if (modalPrev)    modalPrev.addEventListener('click', function () {
       if (modalIndex > 0) showModalAt(modalIndex - 1);
     });
     if (modalNext)    modalNext.addEventListener('click', function () {
+      if (modalIndex < visibleIds.length - 1) showModalAt(modalIndex + 1);
+    });
+    if (modalPrevM)   modalPrevM.addEventListener('click', function () {
+      if (modalIndex > 0) showModalAt(modalIndex - 1);
+    });
+    if (modalNextM)   modalNextM.addEventListener('click', function () {
       if (modalIndex < visibleIds.length - 1) showModalAt(modalIndex + 1);
     });
 

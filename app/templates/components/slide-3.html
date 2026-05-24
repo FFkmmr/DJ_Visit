@@ -29,9 +29,10 @@
 <div class="pf-modal" id="pf-modal" aria-modal="true" role="dialog" aria-label="Просмотр работы" hidden>
     <div class="pf-modal__overlay" id="pf-modal-overlay"></div>
     <div class="pf-modal__panel">
-        <button class="pf-modal__close" id="pf-modal-close" aria-label="Закрыть">&#x2715;</button>
-        <button class="pf-modal__arrow pf-modal__arrow--prev" id="pf-modal-prev" aria-label="Предыдущая">&#8592;</button>
-        <button class="pf-modal__arrow pf-modal__arrow--next" id="pf-modal-next" aria-label="Следующая">&#8594;</button>
+        <!-- desktop: absolute close + side arrows -->
+        <button class="pf-modal__close pf-modal__close--desktop" id="pf-modal-close" aria-label="Закрыть">&#x2715;</button>
+        <button class="pf-modal__arrow pf-modal__arrow--prev pf-modal__arrow--desktop" id="pf-modal-prev" aria-label="Предыдущая">&#8592;</button>
+        <button class="pf-modal__arrow pf-modal__arrow--next pf-modal__arrow--desktop" id="pf-modal-next" aria-label="Следующая">&#8594;</button>
 
         <div class="pf-modal__content">
             <div class="pf-modal__video-wrap">
@@ -49,6 +50,13 @@
                 <div class="pf-modal__tags" id="pf-modal-tags"></div>
                 <p class="pf-modal__desc" id="pf-modal-desc"></p>
             </div>
+        </div>
+
+        <!-- mobile: inline nav bar at bottom -->
+        <div class="pf-modal__nav">
+            <button class="pf-modal__nav-btn pf-modal__nav-btn--prev" id="pf-modal-prev-m" aria-label="Предыдущая">&#8592;</button>
+            <button class="pf-modal__nav-btn pf-modal__nav-btn--close" id="pf-modal-close-m" aria-label="Закрыть">&#x2715;</button>
+            <button class="pf-modal__nav-btn pf-modal__nav-btn--next" id="pf-modal-next-m" aria-label="Следующая">&#8594;</button>
         </div>
     </div>
 </div>

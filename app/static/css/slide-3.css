@@ -272,6 +272,11 @@
   background: rgba(255,255,255,0.15);
 }
 
+/* mobile nav bar — hidden on desktop */
+.pf-modal__nav {
+  display: none;
+}
+
 .pf-modal__arrow {
   position: absolute;
   top: 50%;
@@ -494,30 +499,69 @@
 
 /* Modal responsive */
 @media (max-width: 768px) {
+  .pf-modal {
+    align-items: flex-end;
+  }
+
   .pf-modal__panel {
-    padding: 48px 20px 80px;
+    padding: 24px 20px 0;
     border-radius: 12px 12px 0 0;
     max-height: 96vh;
     width: 100%;
     align-self: flex-end;
   }
 
-  .pf-modal {
-    align-items: flex-end;
-  }
-
   .pf-modal__title {
     font-size: 26px;
   }
 
-  .pf-modal__arrow {
-    top: auto;
-    transform: none;
-    bottom: 18px;
-    width: 44px;
-    height: 44px;
+  /* hide desktop controls */
+  .pf-modal__close--desktop,
+  .pf-modal__arrow--desktop {
+    display: none;
   }
 
-  .pf-modal__arrow--prev { left: 20px; right: auto; }
-  .pf-modal__arrow--next { right: 20px; left: auto; }
+  /* show mobile nav bar */
+  .pf-modal__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 0 24px;
+    margin-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    position: sticky;
+    bottom: 0;
+    background: #0d0d0d;
+  }
+
+  .pf-modal__nav-btn {
+    flex: 1;
+    height: 44px;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 150ms;
+  }
+
+  .pf-modal__nav-btn:active {
+    background: rgba(255,255,255,0.14);
+  }
+
+  .pf-modal__nav-btn--close {
+    font-size: 16px;
+    flex: 0 0 44px;
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .pf-modal__nav-btn[disabled] {
+    opacity: 0.2;
+    cursor: not-allowed;
+  }
 }
