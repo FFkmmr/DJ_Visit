@@ -1,73 +1,18 @@
-{% set portfolio_items = [
-    {'img': 'portfolio-1.png', 'title': 'LIT ENERGY',         'subtitle': 'Яндекс',    'category': 'Реклама'},
-    {'img': 'portfolio-2.png', 'title': 'НОВЫЙ ГОД',          'subtitle': 'Град',      'category': 'Арт-проекты'},
-    {'img': 'portfolio-3.png', 'title': 'ДМИТРИЙ ЖУЛЬКОВ',    'subtitle': 'Шоурил',    'category': 'Reels'},
-    {'img': 'portfolio-4.png', 'title': 'НОЕВ КРУГОВОРОТ',    'subtitle': 'Стихи',     'category': 'Арт-проекты'},
-    {'img': 'portfolio-5.png', 'title': 'ЦЕНА СЛОВА',         'subtitle': 'Подкаст',   'category': 'Бекстейджи'},
-    {'img': 'portfolio-6.png', 'title': 'ШЕСТАКОВА КСЕНИЯ',   'subtitle': 'Шоурил',    'category': 'Reels'}
-] %}
 <section class="section slide-3" id="slide-3" aria-label="Портфолио">
     <h2 class="slide-3__title">ПОРТФОЛИО</h2>
 
     <!-- Sticky filter -->
     <div class="slide-3__filter-wrap">
-        <div class="portfolio__filters" x-data="portfolioFilter()" role="tablist" aria-label="Фильтр портфолио">
-            <button type="button"
-                    class="filter-btn"
-                    :class="{'filter-btn--active': activeFilter === 'all'}"
-                    data-filter="all"
-                    @click="setFilter('all')">Все</button>
-            <button type="button"
-                    class="filter-btn"
-                    :class="{'filter-btn--active': activeFilter === 'Реклама'}"
-                    data-filter="Реклама"
-                    @click="setFilter('Реклама')">Реклама</button>
-            <button type="button"
-                    class="filter-btn"
-                    :class="{'filter-btn--active': activeFilter === 'Детский контент'}"
-                    data-filter="Детский контент"
-                    @click="setFilter('Детский контент')">Детский контент</button>
-            <button type="button"
-                    class="filter-btn"
-                    :class="{'filter-btn--active': activeFilter === 'Арт-проекты'}"
-                    data-filter="Арт-проекты"
-                    @click="setFilter('Арт-проекты')">Арт-проекты</button>
-            <button type="button"
-                    class="filter-btn"
-                    :class="{'filter-btn--active': activeFilter === 'Клипы'}"
-                    data-filter="Клипы"
-                    @click="setFilter('Клипы')">Клипы</button>
-            <button type="button"
-                    class="filter-btn"
-                    :class="{'filter-btn--active': activeFilter === 'Бекстейджи'}"
-                    data-filter="Бекстейджи"
-                    @click="setFilter('Бекстейджи')">Бекстейджи</button>
-            <button type="button"
-                    class="filter-btn"
-                    :class="{'filter-btn--active': activeFilter === 'Reels'}"
-                    data-filter="Reels"
-                    @click="setFilter('Reels')">Reels</button>
+        <div class="portfolio__filters" id="portfolio-filters" role="tablist" aria-label="Фильтр портфолио">
+            <button type="button" class="filter-btn filter-btn--active" data-filter="all">Все</button>
         </div>
         <div class="slide-3__filter-line" aria-hidden="true"></div>
     </div>
 
-    <!-- Grid -->
-    <div class="slide-3__grid" id="portfolio-grid">
-        {% for item in portfolio_items %}
-        <article class="portfolio-card" data-category="{{ item.category }}">
-            <div class="portfolio-card__image-wrap">
-                <img src="{{ url_for('static', filename='img/' ~ item.img) }}"
-                     alt="{{ item.title }}"
-                     class="portfolio-card__img"
-                     loading="lazy">
-            </div>
-            <h3 class="portfolio-card__title">{{ item.title }}</h3>
-            <p class="portfolio-card__subtitle">{{ item.subtitle }}</p>
-        </article>
-        {% endfor %}
-    </div>
+    <!-- Grid (populated by JS) -->
+    <div class="slide-3__grid" id="portfolio-grid"></div>
 
-    <!-- Empty state — shown when filter yields no items -->
+    <!-- Empty state -->
     <p class="slide-3__empty" id="portfolio-empty" hidden>
         По выбранному фильтру работ пока нет.
     </p>
@@ -79,3 +24,31 @@
         </button>
     </div>
 </section>
+
+<!-- Portfolio modal -->
+<div class="pf-modal" id="pf-modal" aria-modal="true" role="dialog" aria-label="Просмотр работы" hidden>
+    <div class="pf-modal__overlay" id="pf-modal-overlay"></div>
+    <div class="pf-modal__panel">
+        <button class="pf-modal__close" id="pf-modal-close" aria-label="Закрыть">&#x2715;</button>
+        <button class="pf-modal__arrow pf-modal__arrow--prev" id="pf-modal-prev" aria-label="Предыдущая">&#8592;</button>
+        <button class="pf-modal__arrow pf-modal__arrow--next" id="pf-modal-next" aria-label="Следующая">&#8594;</button>
+
+        <div class="pf-modal__content">
+            <div class="pf-modal__video-wrap">
+                <video
+                    id="pf-modal-video"
+                    class="pf-modal__video"
+                    controls
+                    playsinline
+                    preload="metadata"
+                ></video>
+            </div>
+            <div class="pf-modal__info">
+                <h3 class="pf-modal__title" id="pf-modal-title"></h3>
+                <p class="pf-modal__subtitle" id="pf-modal-subtitle"></p>
+                <div class="pf-modal__tags" id="pf-modal-tags"></div>
+                <p class="pf-modal__desc" id="pf-modal-desc"></p>
+            </div>
+        </div>
+    </div>
+</div>

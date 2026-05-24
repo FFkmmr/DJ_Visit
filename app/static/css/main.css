@@ -55,6 +55,8 @@
 }
 
 /* ─── CSS Reset ─────────────────────────────────────────────────────────── */
+[hidden] { display: none !important; }
+
 *,
 *::before,
 *::after {

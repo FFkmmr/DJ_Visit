@@ -1,8 +1,12 @@
-﻿{
-    "subtitle":  "Промо-ролик",
-    "description":  "Промо для детской творческой студии.",
-    "video_url":  "",
-    "tag":  "kids",
-    "title":  "Детская студия «Звезда»",
-    "thumb_url":  ""
+{
+  "title": "SHOWREEL 2022 Шестакова Ксения 🔥",
+  "subtitle": "Актриса",
+  "description": "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nulla doloremque aliquid quam error eum dolores sequi aut maxime recusandae rem sapiente modi necessitatibus porro explicabo ducimus numquam veniam, accusamus atque?",
+  "tag": "Фильмы",
+  "tags": [
+    "Фильмы",
+    "Шоурил"
+  ],
+  "video_url": "https://res.cloudinary.com/dox1auiyy/video/upload/v1779665578/dj_visit/portfolio/rtbrj1m025yw3tmopxvy.mp4",
+  "thumb_url": "https://res.cloudinary.com/dox1auiyy/video/upload/v1779665578/dj_visit/portfolio/rtbrj1m025yw3tmopxvy.mp4"
 }

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DM — Управление портфолио</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400&family=Onest:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dm.css') }}">
+</head>
+<body class="dm-body">
+
+<div class="dm-page">
+
+    <!-- Sidebar -->
+    <aside class="dm-sidebar">
+        <div class="dm-sidebar__header">
+            <span class="dm-sidebar__title">Портфолио</span>
+            <a href="{{ url_for('main.dm_logout') }}" class="dm-sidebar__logout">Выйти</a>
+        </div>
+        <button class="dm-btn dm-btn--primary dm-sidebar__new" id="btn-new">+ Новая карточка</button>
+        <ul class="dm-item-list" id="item-list">
+            {% for item in items %}
+            <li class="dm-item-list__item" data-id="{{ item.id }}" data-item='{{ item | tojson }}'>
+                <span class="dm-item-list__title">{{ item.title or '(без названия)' }}</span>
+                <span class="dm-item-list__sub">{{ item.subtitle or '' }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </aside>
+
+    <!-- Main -->
+    <main class="dm-main" id="dm-main">
+        <div class="dm-placeholder" id="dm-placeholder">
+            <p>Выберите карточку или создайте новую</p>
+        </div>
+
+        <div class="dm-editor" id="dm-editor" style="display:none">
+            <div class="dm-editor__cols">
+
+                <!-- Form column -->
+                <div class="dm-editor__form-col">
+                    <h2 class="dm-editor__heading" id="editor-heading">Новая карточка</h2>
+
+                    <!-- Video upload -->
+                    <div class="dm-field">
+                        <label class="dm-label">Видео</label>
+                        <div class="dm-upload-area" id="upload-area">
+                            <div class="dm-upload-area__inner" id="upload-inner">
+                                <span class="dm-upload-area__icon">▶</span>
+                                <span class="dm-upload-area__text">Перетащите файл или <label class="dm-upload-area__link" for="video-file">выберите</label></span>
+                                <input type="file" id="video-file" accept="video/*" class="dm-upload-area__input">
+                            </div>
+                            <div class="dm-upload-progress" id="upload-progress" style="display:none">
+                                <div class="dm-upload-progress__bar">
+                                    <div class="dm-upload-progress__fill" id="upload-fill"></div>
+                                </div>
+                                <span class="dm-upload-progress__label" id="upload-label">Загрузка...</span>
+                            </div>
+                            <div class="dm-upload-done" id="upload-done" style="display:none">
+                                <span class="dm-upload-done__icon">✓</span>
+                                <span class="dm-upload-done__text" id="upload-done-text">Видео загружено</span>
+                                <button class="dm-upload-done__reupload" id="btn-reupload" type="button">Заменить</button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="field-video-url">
+                    </div>
+
+                    <!-- Title -->
+                    <div class="dm-field">
+                        <label class="dm-label" for="field-title">Название</label>
+                        <input class="dm-input" type="text" id="field-title" placeholder="Заголовок">
+                    </div>
+
+                    <!-- Subtitle -->
+                    <div class="dm-field">
+                        <label class="dm-label" for="field-subtitle">Подзаголовок / клиент</label>
+                        <input class="dm-input" type="text" id="field-subtitle" placeholder="Рекламная кампания">
+                    </div>
+
+                    <!-- Description -->
+                    <div class="dm-field">
+                        <label class="dm-label" for="field-description">Описание</label>
+                        <textarea class="dm-input dm-textarea dm-textarea--tall" id="field-description" rows="4" placeholder="Съёмка, монтаж, постпродакшн..."></textarea>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="dm-field">
+                        <label class="dm-label">Теги</label>
+                        <div class="dm-tags-select" id="tags-select">
+                            {% for tag_key in predefined_tags %}
+                            <button type="button" class="dm-tag-btn" data-tag="{{ tag_key }}">
+                                {{ tag_labels[tag_key] }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <div class="dm-custom-tag-wrap">
+                            <input class="dm-input dm-custom-tag-input" type="text" id="custom-tag-input" placeholder="Новый тег...">
+                            <button type="button" class="dm-btn dm-btn--sm" id="btn-add-custom-tag">Добавить</button>
+                        </div>
+                    </div>
+
+                    <div class="dm-editor__actions">
+                        <button class="dm-btn dm-btn--primary" id="btn-save" type="button">Сохранить</button>
+                        <button class="dm-btn dm-btn--danger" id="btn-delete" type="button" style="display:none">Удалить</button>
+                    </div>
+                    <p class="dm-editor__status" id="editor-status"></p>
+                </div>
+
+                <!-- Preview column -->
+                <div class="dm-editor__preview-col">
+                    <div class="dm-preview-label">Предпросмотр</div>
+                    <article class="portfolio-card dm-preview-card" id="preview-card">
+                        <div class="portfolio-card__image-wrap dm-preview-card__media">
+                            <video
+                                id="preview-video"
+                                class="dm-preview-video"
+                                muted
+                                loop
+                                playsinline
+                                style="display:none"
+                            ></video>
+                            <div class="dm-preview-card__placeholder" id="preview-placeholder">
+                                <span>Видео появится здесь</span>
+                            </div>
+                        </div>
+                        <div class="dm-preview-info">
+                            <h3 class="portfolio-card__title dm-preview-title" id="preview-title">Название</h3>
+                            <p class="portfolio-card__subtitle dm-preview-subtitle" id="preview-subtitle">Подзаголовок</p>
+                            <div class="dm-preview-divider"></div>
+                            <div class="dm-preview-tags" id="preview-tags">
+                                <span class="dm-preview-no-tags">теги не выбраны</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+(function () {
+    let currentId = null;
+    let selectedTags = [];
+
+    // refs
+    const editor       = document.getElementById('dm-editor');
+    const placeholder  = document.getElementById('dm-placeholder');
+    const heading      = document.getElementById('editor-heading');
+    const btnNew       = document.getElementById('btn-new');
+    const btnSave      = document.getElementById('btn-save');
+    const btnDelete    = document.getElementById('btn-delete');
+    const statusEl     = document.getElementById('editor-status');
+    const itemList     = document.getElementById('item-list');
+    const tagsSelect   = document.getElementById('tags-select');
+
+    const fieldTitle   = document.getElementById('field-title');
+    const fieldSub     = document.getElementById('field-subtitle');
+    const fieldDesc    = document.getElementById('field-description');
+    const fieldVideoUrl= document.getElementById('field-video-url');
+
+    const videoFile    = document.getElementById('video-file');
+    const uploadArea   = document.getElementById('upload-area');
+    const uploadInner  = document.getElementById('upload-inner');
+    const uploadProgress = document.getElementById('upload-progress');
+    const uploadFill   = document.getElementById('upload-fill');
+    const uploadLabel  = document.getElementById('upload-label');
+    const uploadDone   = document.getElementById('upload-done');
+    const uploadDoneText = document.getElementById('upload-done-text');
+    const btnReupload  = document.getElementById('btn-reupload');
+
+    const previewVideo       = document.getElementById('preview-video');
+    const previewPlaceholder = document.getElementById('preview-placeholder');
+    const previewTitle       = document.getElementById('preview-title');
+    const previewSub         = document.getElementById('preview-subtitle');
+    const previewTags        = document.getElementById('preview-tags');
+
+    // ── open / close editor ────────────────────────────────────────────────
+    function openEditor(item) {
+        placeholder.style.display = 'none';
+        editor.style.display = 'block';
+
+        if (item) {
+            currentId = item.id;
+            heading.textContent = 'Редактировать карточку';
+            btnDelete.style.display = '';
+            populateForm(item);
+        } else {
+            currentId = null;
+            heading.textContent = 'Новая карточка';
+            btnDelete.style.display = 'none';
+            clearForm();
+        }
+        setStatus('');
+    }
+
+    // ── form populate / clear ──────────────────────────────────────────────
+    function populateForm(item) {
+        fieldTitle.value    = item.title || '';
+        fieldSub.value      = item.subtitle || '';
+        fieldDesc.value     = item.description || '';
+        fieldVideoUrl.value = item.video_url || '';
+
+        selectedTags = Array.isArray(item.tags) ? [...item.tags]
+                       : (item.tag ? [item.tag] : []);
+
+        // ensure all saved tags have a button (custom ones may not exist yet)
+        selectedTags.forEach(ensureTagButton);
+        renderTagButtons();
+        syncPreviewText();
+
+        if (item.video_url) {
+            showUploadDone(item.video_url);
+            setPreviewVideo(item.video_url);
+        } else {
+            resetUploadUI();
+            hidePreviewVideo();
+        }
+    }
+
+    function clearForm() {
+        fieldTitle.value    = '';
+        fieldSub.value      = '';
+        fieldDesc.value     = '';
+        fieldVideoUrl.value = '';
+        selectedTags = [];
+        renderTagButtons();
+        syncPreviewText();
+        resetUploadUI();
+        hidePreviewVideo();
+    }
+
+    // ── tags ───────────────────────────────────────────────────────────────
+    // Make sure a button for `tag` exists in #tags-select; create if missing
+    function ensureTagButton(tag) {
+        const existing = tagsSelect.querySelector('[data-tag="' + CSS.escape(tag) + '"]');
+        if (!existing) {
+            createTagButton(tag);
+        }
+    }
+
+    function createTagButton(tag) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'dm-tag-btn';
+        btn.dataset.tag = tag;
+        btn.textContent = tag;
+        btn.addEventListener('click', onTagBtnClick);
+        tagsSelect.appendChild(btn);
+        return btn;
+    }
+
+    function onTagBtnClick() {
+        const tag = this.dataset.tag;
+        if (selectedTags.includes(tag)) {
+            selectedTags = selectedTags.filter(t => t !== tag);
+        } else {
+            selectedTags.push(tag);
+        }
+        renderTagButtons();
+        updatePreviewTags();
+    }
+
+    // wire up predefined buttons
+    tagsSelect.querySelectorAll('.dm-tag-btn').forEach(btn => btn.addEventListener('click', onTagBtnClick));
+
+    function renderTagButtons() {
+        tagsSelect.querySelectorAll('.dm-tag-btn').forEach(btn => {
+            btn.classList.toggle('dm-tag-btn--active', selectedTags.includes(btn.dataset.tag));
+        });
+    }
+
+    function updatePreviewTags() {
+        previewTags.innerHTML = '';
+        if (!selectedTags.length) {
+            previewTags.innerHTML = '<span class="dm-preview-no-tags">теги не выбраны</span>';
+            return;
+        }
+        selectedTags.forEach(tag => {
+            const span = document.createElement('span');
+            span.className = 'dm-preview-tag';
+            span.textContent = tag;
+            previewTags.appendChild(span);
+        });
+    }
+
+    // add custom tag → becomes a button in the list, auto-selected
+    document.getElementById('btn-add-custom-tag').addEventListener('click', () => {
+        const input = document.getElementById('custom-tag-input');
+        const val = input.value.trim();
+        if (!val) return;
+        input.value = '';
+
+        // add button if not exists
+        const existing = tagsSelect.querySelector('[data-tag="' + CSS.escape(val) + '"]');
+        if (!existing) createTagButton(val);
+
+        // select it
+        if (!selectedTags.includes(val)) {
+            selectedTags.push(val);
+            renderTagButtons();
+            updatePreviewTags();
+        }
+    });
+
+    document.getElementById('custom-tag-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('btn-add-custom-tag').click();
+        }
+    });
+
+    // ── live preview ───────────────────────────────────────────────────────
+    function syncPreviewText() {
+        previewTitle.textContent = fieldTitle.value || 'Название';
+        previewSub.textContent   = fieldSub.value   || 'Подзаголовок';
+        updatePreviewTags();
+    }
+
+    [fieldTitle, fieldSub, fieldDesc].forEach(el => el.addEventListener('input', syncPreviewText));
+
+    // ── video upload ───────────────────────────────────────────────────────
+    function setPreviewVideo(url) {
+        previewVideo.src = url;
+        previewVideo.style.display = '';
+        previewPlaceholder.style.display = 'none';
+        previewVideo.load();
+        previewVideo.play().catch(() => {});
+    }
+
+    function hidePreviewVideo() {
+        previewVideo.pause();
+        previewVideo.src = '';
+        previewVideo.style.display = 'none';
+        previewPlaceholder.style.display = '';
+    }
+
+    function showUploadDone(url) {
+        uploadInner.style.display   = 'none';
+        uploadProgress.style.display = 'none';
+        uploadDone.style.display    = '';
+        uploadDoneText.textContent  = url.split('/').pop().split('?')[0];
+    }
+
+    function resetUploadUI() {
+        uploadInner.style.display    = '';
+        uploadProgress.style.display = 'none';
+        uploadDone.style.display     = 'none';
+        uploadFill.style.width       = '0%';
+    }
+
+    btnReupload.addEventListener('click', () => {
+        resetUploadUI();
+        fieldVideoUrl.value = '';
+        hidePreviewVideo();
+        videoFile.value = '';
+    });
+
+    videoFile.addEventListener('change', () => {
+        const file = videoFile.files[0];
+        if (file) uploadVideo(file);
+    });
+
+    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dm-upload-area--drag'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dm-upload-area--drag'));
+    uploadArea.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadArea.classList.remove('dm-upload-area--drag');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('video/')) uploadVideo(file);
+    });
+
+    function uploadVideo(file) {
+        const originalName = file.name.replace(/\.[^.]+$/, '');
+        uploadInner.style.display    = 'none';
+        uploadProgress.style.display = '';
+        uploadDone.style.display     = 'none';
+        uploadFill.style.width       = '0%';
+        uploadLabel.textContent      = 'Загрузка...';
+
+        const formData = new FormData();
+        formData.append('video', file);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/dm/upload-video');
+
+        xhr.upload.addEventListener('progress', e => {
+            if (e.lengthComputable) {
+                const pct = Math.round(e.loaded / e.total * 100);
+                uploadFill.style.width  = pct + '%';
+                uploadLabel.textContent = pct + '%';
+            }
+        });
+
+        xhr.addEventListener('load', () => {
+            try {
+                const data = JSON.parse(xhr.responseText);
+                if (data.url) {
+                    fieldVideoUrl.value = data.url;
+                    if (!fieldTitle.value.trim()) {
+                        fieldTitle.value = originalName;
+                        syncPreviewText();
+                    }
+                    showUploadDone(data.url);
+                    setPreviewVideo(data.url);
+                } else {
+                    uploadLabel.textContent = 'Ошибка: ' + (data.error || 'unknown');
+                    resetUploadUI();
+                }
+            } catch { resetUploadUI(); }
+        });
+
+        xhr.addEventListener('error', () => {
+            uploadLabel.textContent = 'Ошибка загрузки';
+            setTimeout(resetUploadUI, 2000);
+        });
+
+        xhr.send(formData);
+    }
+
+    // ── sidebar clicks ─────────────────────────────────────────────────────
+    itemList.addEventListener('click', e => {
+        const li = e.target.closest('.dm-item-list__item');
+        if (!li) return;
+        itemList.querySelectorAll('.dm-item-list__item').forEach(el => el.classList.remove('dm-item-list__item--active'));
+        li.classList.add('dm-item-list__item--active');
+        openEditor(JSON.parse(li.dataset.item));
+    });
+
+    btnNew.addEventListener('click', () => {
+        itemList.querySelectorAll('.dm-item-list__item').forEach(el => el.classList.remove('dm-item-list__item--active'));
+        openEditor(null);
+    });
+
+    // ── save ───────────────────────────────────────────────────────────────
+    btnSave.addEventListener('click', async () => {
+        const payload = {
+            title:       fieldTitle.value.trim(),
+            subtitle:    fieldSub.value.trim(),
+            description: fieldDesc.value.trim(),
+            tags:        selectedTags,
+            video_url:   fieldVideoUrl.value.trim(),
+            thumb_url:   fieldVideoUrl.value.trim(),
+        };
+
+        const url    = currentId ? '/api/dm/portfolio/' + currentId : '/api/dm/portfolio';
+        const method = currentId ? 'PUT' : 'POST';
+
+        setStatus('Сохранение...');
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const saved = await res.json();
+            setStatus('Сохранено ✓');
+
+            if (!currentId) {
+                currentId = saved.id;
+                heading.textContent = 'Редактировать карточку';
+                btnDelete.style.display = '';
+                const li = document.createElement('li');
+                li.className = 'dm-item-list__item dm-item-list__item--active';
+                li.dataset.id   = saved.id;
+                li.dataset.item = JSON.stringify(saved);
+                li.innerHTML = '<span class="dm-item-list__title">' + esc(saved.title || '(без названия)') + '</span>'
+                             + '<span class="dm-item-list__sub">'   + esc(saved.subtitle || '') + '</span>';
+                itemList.appendChild(li);
+            } else {
+                const li = itemList.querySelector('[data-id="' + currentId + '"]');
+                if (li) {
+                    li.dataset.item = JSON.stringify(saved);
+                    li.querySelector('.dm-item-list__title').textContent = saved.title || '(без названия)';
+                    li.querySelector('.dm-item-list__sub').textContent   = saved.subtitle || '';
+                }
+            }
+        } catch (e) {
+            setStatus('Ошибка: ' + e.message);
+        }
+    });
+
+    // ── delete ─────────────────────────────────────────────────────────────
+    btnDelete.addEventListener('click', async () => {
+        if (!currentId) return;
+        if (!confirm('Удалить карточку «' + fieldTitle.value + '»?')) return;
+        setStatus('Удаление...');
+        try {
+            const res = await fetch('/api/dm/portfolio/' + currentId, { method: 'DELETE' });
+            if (!res.ok) throw new Error(await res.text());
+            const li = itemList.querySelector('[data-id="' + currentId + '"]');
+            if (li) li.remove();
+            editor.style.display      = 'none';
+            placeholder.style.display = '';
+            currentId = null;
+        } catch (e) {
+            setStatus('Ошибка: ' + e.message);
+        }
+    });
+
+    function setStatus(msg) { statusEl.textContent = msg; }
+    function esc(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+})();
+</script>
+</body>
+</html>

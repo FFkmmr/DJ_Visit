@@ -97,7 +97,11 @@
       "Bash(kill %1)",
       "mcp__figma__get_figma_data",
       "mcp__figma__download_figma_images",
-      "Bash(ffmpeg -i app/static/movies/main_backgr.mp4 -vcodec libx264 -crf 28 -preset fast -acodec aac -b:a 128k app/static/movies/main_backgr_compressed.mp4 -y)"
+      "Bash(ffmpeg -i app/static/movies/main_backgr.mp4 -vcodec libx264 -crf 28 -preset fast -acodec aac -b:a 128k app/static/movies/main_backgr_compressed.mp4 -y)",
+      "PowerShell(if \\($?\\) { \"config.py OK\" } else { \"SYNTAX ERROR\" })",
+      "Bash(C:\\\\Users\\\\asus\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe -m pip install pillow -q)",
+      "Bash(C:UsersasusAppDataLocalProgramsPythonPython313python.exe -c ' *)",
+      "PowerShell(pip install pillow -q 2>&1)"
     ],
     "deny": [
       "Bash(rm:*)",

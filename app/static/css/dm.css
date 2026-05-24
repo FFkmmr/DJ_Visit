@@ -1,0 +1,586 @@
+/* ============================================================================
+   DM.CSS — Admin panel styles (/dm)
+   ============================================================================ */
+
+[hidden] { display: none !important; }
+
+.dm-body {
+  background-color: #0a0a0a;
+  color: #fff;
+  font-family: var(--font-onest);
+  min-height: 100vh;
+}
+
+/* ── Login page ────────────────────────────────────────────────────────────── */
+.dm-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 32px;
+}
+
+.dm-login__title {
+  font-family: var(--font-oswald);
+  font-size: 72px;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  color: var(--color-orange);
+}
+
+.dm-login__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 320px;
+}
+
+.dm-login__input {
+  text-align: center;
+  font-size: 20px;
+  letter-spacing: 0.2em;
+}
+
+.dm-login__error {
+  color: #ff5555;
+  font-size: 14px;
+  text-align: center;
+}
+
+.dm-login__btn {
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+}
+
+/* ── Shared UI primitives ──────────────────────────────────────────────────── */
+.dm-input {
+  width: 100%;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 150ms;
+}
+
+.dm-input:focus {
+  border-color: var(--color-orange);
+}
+
+.dm-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.dm-textarea--tall {
+  min-height: 120px;
+}
+
+.dm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-family: var(--font-oswald);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 150ms, color 150ms, border-color 150ms;
+}
+
+.dm-btn--primary {
+  background: var(--color-orange);
+  color: #000;
+}
+
+.dm-btn--primary:hover {
+  background: #e6a800;
+}
+
+.dm-btn--danger {
+  background: transparent;
+  border-color: #ff5555;
+  color: #ff5555;
+}
+
+.dm-btn--danger:hover {
+  background: #ff5555;
+  color: #fff;
+}
+
+.dm-btn--sm {
+  padding: 6px 14px;
+  font-size: 18px;
+  border: 1px solid #444;
+  color: #fff;
+  background: #1a1a1a;
+}
+
+.dm-btn--sm:hover {
+  background: #2a2a2a;
+}
+
+/* ── Page layout ──────────────────────────────────────────────────────────── */
+.dm-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────────── */
+.dm-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: #111;
+  border-right: 1px solid #222;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  gap: 16px;
+}
+
+.dm-sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dm-sidebar__title {
+  font-family: var(--font-oswald);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--color-orange);
+}
+
+.dm-sidebar__logout {
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.dm-sidebar__logout:hover {
+  color: #fff;
+}
+
+.dm-sidebar__new {
+  width: 100%;
+  height: 40px;
+}
+
+.dm-item-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dm-item-list__item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 150ms, border-color 150ms;
+}
+
+.dm-item-list__item:hover {
+  background: #1a1a1a;
+}
+
+.dm-item-list__item--active {
+  background: #1e1e1e;
+  border-color: var(--color-orange);
+}
+
+.dm-item-list__title {
+  display: block;
+  font-size: 14px;
+  font-weight: 400;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dm-item-list__sub {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Main / editor ────────────────────────────────────────────────────────── */
+.dm-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px;
+}
+
+.dm-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 400px;
+  color: #444;
+  font-size: 18px;
+}
+
+.dm-editor__heading {
+  font-family: var(--font-oswald);
+  font-size: 28px;
+  font-weight: 300;
+  margin-bottom: 28px;
+}
+
+.dm-editor__cols {
+  display: grid;
+  grid-template-columns: 1fr 480px;
+  gap: 40px;
+  align-items: start;
+}
+
+/* ── Fields ───────────────────────────────────────────────────────────────── */
+.dm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.dm-label {
+  font-size: 13px;
+  font-weight: 400;
+  color: #999;
+  letter-spacing: 0.03em;
+}
+
+.dm-label__hint {
+  color: #555;
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+/* ── Upload area ──────────────────────────────────────────────────────────── */
+.dm-upload-area {
+  border: 2px dashed #333;
+  border-radius: 12px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 150ms, background 150ms;
+}
+
+.dm-upload-area--drag,
+.dm-upload-area:hover {
+  border-color: var(--color-orange);
+  background: rgba(255, 187, 0, 0.04);
+}
+
+.dm-upload-area__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px;
+}
+
+.dm-upload-area__icon {
+  font-size: 32px;
+  color: #444;
+}
+
+.dm-upload-area__text {
+  font-size: 14px;
+  color: #666;
+}
+
+.dm-upload-area__link {
+  color: var(--color-orange);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.dm-upload-area__input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dm-upload-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 24px;
+}
+
+.dm-upload-progress__bar {
+  width: 100%;
+  height: 6px;
+  background: #222;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.dm-upload-progress__fill {
+  height: 100%;
+  background: var(--color-orange);
+  border-radius: 3px;
+  transition: width 200ms;
+}
+
+.dm-upload-progress__label {
+  font-size: 13px;
+  color: #999;
+}
+
+.dm-upload-done {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  width: 100%;
+}
+
+.dm-upload-done__icon {
+  color: #4caf50;
+  font-size: 22px;
+}
+
+.dm-upload-done__text {
+  flex: 1;
+  font-size: 13px;
+  color: #aaa;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dm-upload-done__reupload {
+  font-size: 12px;
+  color: var(--color-orange);
+  cursor: pointer;
+  text-decoration: underline;
+  background: none;
+  border: none;
+  white-space: nowrap;
+}
+
+/* ── Tags ─────────────────────────────────────────────────────────────────── */
+.dm-tags-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dm-tag-btn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid #333;
+  background: #111;
+  color: #999;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 150ms, color 150ms, border-color 150ms;
+}
+
+.dm-tag-btn:hover {
+  border-color: #555;
+  color: #fff;
+}
+
+.dm-tag-btn--active {
+  background: var(--color-orange);
+  border-color: var(--color-orange);
+  color: #000;
+}
+
+.dm-custom-tag-wrap {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.dm-custom-tag-input {
+  flex: 1;
+}
+
+.dm-selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 28px;
+}
+
+.dm-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 14px;
+  background: #1e1e1e;
+  border: 1px solid #444;
+  font-size: 12px;
+  color: #ddd;
+}
+
+.dm-tag-chip__remove {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+}
+
+.dm-tag-chip__remove:hover {
+  color: #ff5555;
+}
+
+/* ── Actions ──────────────────────────────────────────────────────────────── */
+.dm-editor__actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.dm-editor__status {
+  font-size: 13px;
+  color: #888;
+  margin-top: 10px;
+  min-height: 20px;
+}
+
+/* ── Preview column ───────────────────────────────────────────────────────── */
+.dm-editor__preview-col {
+  position: sticky;
+  top: 24px;
+  background: #0d0d0d;
+  border: 1px solid #1e1e1e;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.dm-preview-label {
+  font-size: 11px;
+  color: #444;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 18px 20px 0;
+}
+
+/* video / placeholder area */
+.dm-preview-card {
+  cursor: default;
+  width: 100%;
+  padding: 0;
+}
+
+.dm-preview-card__media {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+  background: #111;
+  margin-top: 12px;
+}
+
+.dm-preview-card__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  background: #111;
+  color: #333;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  position: absolute;
+  inset: 0;
+}
+
+.dm-preview-card__placeholder::before {
+  content: '▶';
+  font-size: 28px;
+  color: #2a2a2a;
+}
+
+.dm-preview-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* info block */
+.dm-preview-info {
+  padding: 20px 20px 24px;
+}
+
+.portfolio-card__title.dm-preview-title {
+  font-family: var(--font-oswald);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #fff;
+  margin: 0 0 4px;
+  letter-spacing: 0.02em;
+}
+
+.portfolio-card__subtitle.dm-preview-subtitle {
+  font-family: var(--font-onest);
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.4);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.dm-preview-divider {
+  height: 1px;
+  background: #1e1e1e;
+  margin: 16px 0;
+}
+
+.dm-preview-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dm-preview-tag {
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(255, 187, 0, 0.08);
+  border: 1px solid rgba(255, 187, 0, 0.25);
+  font-family: var(--font-onest);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-orange);
+  letter-spacing: 0.02em;
+}
+
+.dm-preview-no-tags {
+  font-size: 12px;
+  color: #333;
+  font-style: italic;
+}

@@ -1,8 +1,12 @@
-﻿{
-    "subtitle":  "Рекламная кампания",
-    "description":  "Имиджевый ролик для бренда Литвин. Съёмка, монтаж, постпродакшн.",
-    "video_url":  "",
-    "tag":  "ad",
-    "title":  "Литвин — имиджевый ролик",
-    "thumb_url":  ""
+{
+  "title": "Шоурил",
+  "subtitle": "Участие в съёмках",
+  "description": "123",
+  "story": "qwerty",
+  "tag": "Фильмы",
+  "tags": [
+    "Фильмы"
+  ],
+  "video_url": "https://res.cloudinary.com/dox1auiyy/video/upload/v1779663458/dj_visit/portfolio/t1btufrpfr2krazwadnt.mp4",
+  "thumb_url": "https://res.cloudinary.com/dox1auiyy/video/upload/v1779663458/dj_visit/portfolio/t1btufrpfr2krazwadnt.mp4"
 }

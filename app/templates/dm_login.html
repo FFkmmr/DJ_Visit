@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DM — Вход</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400&family=Onest:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dm.css') }}">
+</head>
+<body class="dm-body">
+    <div class="dm-login">
+        <h1 class="dm-login__title">DM</h1>
+        <form class="dm-login__form" method="POST" action="{{ url_for('main.dm') }}">
+            <input
+                class="dm-input dm-login__input"
+                type="password"
+                name="password"
+                placeholder="Пароль"
+                autofocus
+                required
+            >
+            {% if error %}
+            <p class="dm-login__error">{{ error }}</p>
+            {% endif %}
+            <button class="dm-btn dm-btn--primary dm-login__btn" type="submit">Войти</button>
+        </form>
+    </div>
+</body>
+</html>
