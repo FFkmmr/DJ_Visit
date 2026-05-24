@@ -142,6 +142,7 @@ select {
   margin-left: auto;
   margin-right: auto;
   overflow: hidden;
+  scroll-margin-top: var(--header-height);
 }
 
 /* Utility: visually hidden (for screen readers) */
