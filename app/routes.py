@@ -8,7 +8,7 @@ from config import CLOUDINARY_VIDEOS
 main_bp = Blueprint('main', __name__)
 
 DM_PASSWORD = '123'
-PORTFOLIO_DIR = 'data/portfolio'
+PORTFOLIO_DIR = os.environ.get('PORTFOLIO_DIR', '/data/portfolio')
 
 PREDEFINED_TAGS = ['ad', 'kids', 'art', 'clips', 'backstage', 'reels', 'corp']
 
