@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, jsonify, request, session, redirect, url_for, abort
+from flask import Blueprint, render_template, jsonify, request, session, redirect, url_for, abort, send_file
 import os
+import re
 import json
 import cloudinary
 import cloudinary.uploader
@@ -33,11 +34,69 @@ TAG_LABELS = {
 }
 
 
+def _extract_youtube_id(url):
+    """Extract YouTube video ID from various URL formats."""
+    if not url:
+        return None
+    patterns = [
+        r'(?:youtube\.com/watch\?.*v=|youtu\.be/|youtube\.com/shorts/)([a-zA-Z0-9_-]{11})',
+        r'youtube\.com/embed/([a-zA-Z0-9_-]{11})',
+    ]
+    for pattern in patterns:
+        m = re.search(pattern, url)
+        if m:
+            return m.group(1)
+    return None
+
+
+def _detect_video_type(video_url):
+    """Infer video_type from URL if not explicitly stored."""
+    if not video_url:
+        return 'cloudinary'
+    if _extract_youtube_id(video_url):
+        return 'youtube'
+    if video_url.startswith('/api/portfolio-video/'):
+        return 'local'
+    return 'cloudinary'
+
+
+ORDER_FILE = os.path.join(PORTFOLIO_DIR, 'order.json') if PORTFOLIO_DIR else None
+
+
+def _load_order():
+    if ORDER_FILE and os.path.isfile(ORDER_FILE):
+        try:
+            with open(ORDER_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
+
+
+def _save_order(order):
+    if not ORDER_FILE:
+        return
+    os.makedirs(os.path.dirname(ORDER_FILE), exist_ok=True)
+    with open(ORDER_FILE, 'w', encoding='utf-8') as f:
+        json.dump(order, f, ensure_ascii=False)
+
+
 def _load_portfolio_items():
     all_items = []
     if not os.path.exists(PORTFOLIO_DIR):
         return all_items
-    for video_id in sorted(os.listdir(PORTFOLIO_DIR)):
+
+    saved_order = _load_order()
+
+    all_ids = sorted(
+        d for d in os.listdir(PORTFOLIO_DIR)
+        if os.path.isdir(os.path.join(PORTFOLIO_DIR, d)) and d != '__pycache__'
+    )
+    # merge: saved order first, then any new ids not yet in order
+    ordered_ids = [i for i in saved_order if i in all_ids]
+    ordered_ids += [i for i in all_ids if i not in ordered_ids]
+
+    for video_id in ordered_ids:
         video_path = os.path.join(PORTFOLIO_DIR, video_id)
         if not os.path.isdir(video_path):
             continue
@@ -49,12 +108,28 @@ def _load_portfolio_items():
         item['id'] = video_id
         primary_tag = item.get('tag', '')
         item['category'] = TAG_TO_CATEGORY.get(primary_tag, primary_tag) if primary_tag else ''
-        # all tags as display names for dynamic filter building
         all_tags = item.get('tags', [primary_tag] if primary_tag else [])
         item['categories'] = list(dict.fromkeys(
             TAG_TO_CATEGORY.get(t, t) for t in all_tags if t
         ))
-        item['thumbnail'] = item.get('thumb_url', '')
+        if 'video_type' not in item:
+            item['video_type'] = _detect_video_type(item.get('video_url', ''))
+        # auto-generate cloudinary thumbnail for cards where thumb_url == video_url
+        vtype = item['video_type']
+        thumb = item.get('thumb_url', '')
+        vurl  = item.get('video_url', '')
+        if vtype == 'cloudinary' and vurl and (not thumb or thumb == vurl):
+            thumb = re.sub(
+                r'/video/upload/',
+                '/video/upload/so_0,f_jpg,q_auto/',
+                vurl
+            ).rsplit('.', 1)[0] + '.jpg'
+            item['thumb_url'] = thumb
+        item['thumbnail'] = thumb
+        if item['video_type'] == 'youtube':
+            item['youtube_id'] = _extract_youtube_id(item.get('video_url', ''))
+        if 'related' not in item:
+            item['related'] = []
         all_items.append(item)
     return all_items
 
@@ -146,6 +221,70 @@ def dm_logout():
     return redirect(url_for('main.dm'))
 
 
+@main_bp.route('/api/portfolio-video/<item_id>')
+def portfolio_video_stream(item_id):
+    """Serve locally stored portfolio video from Railway /data volume."""
+    safe_id = re.sub(r'[^a-zA-Z0-9_-]', '', item_id)
+    video_path = os.path.join(PORTFOLIO_DIR, safe_id, 'video.mp4')
+    if not os.path.isfile(video_path):
+        abort(404)
+    return send_file(video_path, mimetype='video/mp4', conditional=True)
+
+
+@main_bp.route('/api/dm/upload-video-local', methods=['POST'])
+def dm_upload_video_local():
+    """Upload video file to Railway /data volume."""
+    if not session.get('dm_auth'):
+        abort(403)
+    f = request.files.get('video')
+    if not f:
+        return jsonify({'error': 'No file'}), 400
+    new_id = _next_portfolio_id()
+    folder = os.path.join(PORTFOLIO_DIR, new_id)
+    os.makedirs(folder, exist_ok=True)
+    dest = os.path.join(folder, 'video.mp4')
+    try:
+        f.save(dest)
+        url = '/api/portfolio-video/' + new_id
+        return jsonify({'url': url, 'local_id': new_id})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@main_bp.route('/api/dm/upload-thumb-local', methods=['POST'])
+def dm_upload_thumb_local():
+    """Upload thumbnail image for a locally stored video."""
+    if not session.get('dm_auth'):
+        abort(403)
+    f = request.files.get('thumb')
+    item_id = request.form.get('item_id', '').strip()
+    if not f or not item_id:
+        return jsonify({'error': 'No file or item_id'}), 400
+    safe_id = re.sub(r'[^a-zA-Z0-9_-]', '', item_id)
+    folder = os.path.join(PORTFOLIO_DIR, safe_id)
+    os.makedirs(folder, exist_ok=True)
+    ext = os.path.splitext(f.filename)[1].lower() or '.jpg'
+    dest = os.path.join(folder, 'thumb' + ext)
+    try:
+        f.save(dest)
+        url = '/api/portfolio-thumb/' + safe_id
+        return jsonify({'thumb_url': url})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@main_bp.route('/api/portfolio-thumb/<item_id>')
+def portfolio_thumb_stream(item_id):
+    """Serve locally stored thumbnail from Railway /data volume."""
+    safe_id = re.sub(r'[^a-zA-Z0-9_-]', '', item_id)
+    folder = os.path.join(PORTFOLIO_DIR, safe_id)
+    for ext in ('.jpg', '.jpeg', '.png', '.webp'):
+        p = os.path.join(folder, 'thumb' + ext)
+        if os.path.isfile(p):
+            return send_file(p)
+    abort(404)
+
+
 @main_bp.route('/api/dm/upload-video', methods=['POST'])
 def dm_upload_video():
     if not session.get('dm_auth'):
@@ -158,8 +297,20 @@ def dm_upload_video():
             f,
             resource_type='video',
             folder='dj_visit/portfolio',
+            eager=[{'so': '0', 'format': 'jpg', 'quality': 'auto'}],
+            eager_async=False,
         )
-        return jsonify({'url': result['secure_url'], 'public_id': result['public_id']})
+        video_url = result['secure_url']
+        # use eager thumbnail if available, else derive it from the video URL
+        if result.get('eager'):
+            thumb_url = result['eager'][0]['secure_url']
+        else:
+            thumb_url = re.sub(
+                r'/video/upload/',
+                '/video/upload/so_0,f_jpg,q_auto/',
+                video_url
+            ).rsplit('.', 1)[0] + '.jpg'
+        return jsonify({'url': video_url, 'thumb_url': thumb_url, 'public_id': result['public_id']})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -177,13 +328,16 @@ def dm_portfolio_create():
     tags = data.get('tags', [])
     primary_tag = tags[0] if tags else ''
 
+    video_url = data.get('video_url', '')
+    video_type = data.get('video_type') or _detect_video_type(video_url)
     item = {
         'title':       data.get('title', ''),
         'subtitle':    data.get('subtitle', ''),
         'description': data.get('description', ''),
         'tag':         primary_tag,
         'tags':        tags,
-        'video_url':   data.get('video_url', ''),
+        'video_url':   video_url,
+        'video_type':  video_type,
         'thumb_url':   data.get('thumb_url', ''),
     }
     with open(os.path.join(folder, 'data.json'), 'w', encoding='utf-8') as f:
@@ -192,6 +346,8 @@ def dm_portfolio_create():
     item['id'] = new_id
     item['category'] = TAG_TO_CATEGORY.get(primary_tag, '')
     item['thumbnail'] = item['thumb_url']
+    if video_type == 'youtube':
+        item['youtube_id'] = _extract_youtube_id(video_url)
     return jsonify(item), 201
 
 
@@ -210,13 +366,16 @@ def dm_portfolio_update(item_id):
     tags = patch.get('tags', existing.get('tags', []))
     primary_tag = tags[0] if tags else existing.get('tag', '')
 
+    new_video_url = patch.get('video_url', existing.get('video_url', ''))
+    new_video_type = patch.get('video_type') or _detect_video_type(new_video_url)
     existing.update({
         'title':       patch.get('title', existing.get('title', '')),
         'subtitle':    patch.get('subtitle', existing.get('subtitle', '')),
         'description': patch.get('description', existing.get('description', '')),
         'tag':         primary_tag,
         'tags':        tags,
-        'video_url':   patch.get('video_url', existing.get('video_url', '')),
+        'video_url':   new_video_url,
+        'video_type':  new_video_type,
         'thumb_url':   patch.get('thumb_url', existing.get('thumb_url', '')),
     })
     with open(data_file, 'w', encoding='utf-8') as f:
@@ -225,6 +384,8 @@ def dm_portfolio_update(item_id):
     existing['id'] = item_id
     existing['category'] = TAG_TO_CATEGORY.get(primary_tag, '')
     existing['thumbnail'] = existing['thumb_url']
+    if new_video_type == 'youtube':
+        existing['youtube_id'] = _extract_youtube_id(new_video_url)
     return jsonify(existing)
 
 
@@ -235,6 +396,123 @@ def dm_portfolio_delete(item_id):
     folder = os.path.join(PORTFOLIO_DIR, item_id)
     if not os.path.isdir(folder):
         abort(404)
+
+    # delete from Cloudinary if applicable
+    data_file = os.path.join(folder, 'data.json')
+    if os.path.isfile(data_file):
+        try:
+            with open(data_file, 'r', encoding='utf-8-sig') as f:
+                item_data = json.load(f)
+            if item_data.get('video_type') == 'cloudinary':
+                video_url = item_data.get('video_url', '')
+                # extract public_id: everything between /upload/ and file extension
+                m = re.search(r'/upload/(?:v\d+/)?(.+)\.[a-z0-9]+$', video_url)
+                if m:
+                    public_id = m.group(1)
+                    cloudinary.uploader.destroy(public_id, resource_type='video')
+        except Exception:
+            pass  # don't block deletion if Cloudinary call fails
+
     import shutil
     shutil.rmtree(folder)
+    # remove from order file
+    order = _load_order()
+    if item_id in order:
+        order.remove(item_id)
+        _save_order(order)
+    return jsonify({'ok': True})
+
+
+@main_bp.route('/api/dm/portfolio/<item_id>/related', methods=['POST'])
+def dm_related_save(item_id):
+    if not session.get('dm_auth'):
+        abort(403)
+    folder = os.path.join(PORTFOLIO_DIR, item_id)
+    if not os.path.isdir(folder):
+        abort(404)
+
+    data = request.get_json(force=True)
+    new_related = [str(i) for i in data.get('related', []) if str(i) != item_id]
+
+    def _read_item(vid):
+        p = os.path.join(PORTFOLIO_DIR, vid, 'data.json')
+        if not os.path.isfile(p):
+            return None
+        with open(p, 'r', encoding='utf-8-sig') as f:
+            return json.load(f)
+
+    def _write_item(vid, obj):
+        p = os.path.join(PORTFOLIO_DIR, vid, 'data.json')
+        with open(p, 'w', encoding='utf-8') as f:
+            json.dump(obj, f, ensure_ascii=False, indent=2)
+
+    # load current item
+    current = _read_item(item_id)
+    if current is None:
+        abort(404)
+    old_related = current.get('related', [])
+
+    # update current item
+    current['related'] = new_related
+    _write_item(item_id, current)
+
+    # symmetric sync: add item_id to every new related, remove from old ones no longer related
+    removed = [r for r in old_related if r not in new_related]
+    added   = [r for r in new_related if r not in old_related]
+
+    for rid in added:
+        obj = _read_item(rid)
+        if obj is None:
+            continue
+        rels = obj.get('related', [])
+        if item_id not in rels:
+            rels.append(item_id)
+            obj['related'] = rels
+            _write_item(rid, obj)
+
+    for rid in removed:
+        obj = _read_item(rid)
+        if obj is None:
+            continue
+        rels = obj.get('related', [])
+        if item_id in rels:
+            rels.remove(item_id)
+            obj['related'] = rels
+            _write_item(rid, obj)
+
+    return jsonify({'ok': True, 'related': new_related})
+
+
+@main_bp.route('/api/dm/order', methods=['GET'])
+def dm_order_get():
+    if not session.get('dm_auth'):
+        abort(403)
+    items = _load_portfolio_items()
+    result = []
+    for item in items:
+        ytid = item.get('youtube_id') or _extract_youtube_id(item.get('video_url', ''))
+        thumb = ''
+        if item.get('video_type') == 'youtube' and ytid:
+            thumb = 'https://img.youtube.com/vi/' + ytid + '/mqdefault.jpg'
+        else:
+            thumb = item.get('thumb_url', '') or item.get('thumbnail', '')
+        result.append({
+            'id':       item['id'],
+            'title':    item.get('title', ''),
+            'subtitle': item.get('subtitle', ''),
+            'thumb':    thumb,
+            'video_type': item.get('video_type', 'cloudinary'),
+        })
+    return jsonify(result)
+
+
+@main_bp.route('/api/dm/order', methods=['POST'])
+def dm_order_save():
+    if not session.get('dm_auth'):
+        abort(403)
+    data = request.get_json(force=True)
+    order = data.get('order', [])
+    if not isinstance(order, list):
+        return jsonify({'error': 'order must be a list'}), 400
+    _save_order(order)
     return jsonify({'ok': True})

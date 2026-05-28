@@ -336,6 +336,13 @@
   display: block;
 }
 
+.pf-modal__iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
 .pf-modal__info {
   display: flex;
   flex-direction: column;
@@ -565,4 +572,110 @@
     opacity: 0.2;
     cursor: not-allowed;
   }
+}
+
+/* ── Related videos strip ─────────────────────────────────────────────────── */
+.pf-modal__related {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 0;
+}
+
+.pf-modal__related[hidden] {
+  display: none;
+}
+
+.pf-modal__related-track-wrap {
+  flex: 1;
+  overflow: hidden;
+}
+
+.pf-modal__related-track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding: 4px 0;
+  list-style: none;
+  margin: 0;
+  justify-content: center;
+}
+
+.pf-modal__related-track::-webkit-scrollbar {
+  display: none;
+}
+
+.pf-modal__related-item {
+  flex-shrink: 0;
+  width: 120px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+@media (max-width: 768px) {
+  .pf-modal__related-item {
+    width: 90px;
+  }
+}
+
+.pf-modal__related-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #1a1a1a;
+  border: 2px solid transparent;
+  transition: border-color 150ms;
+}
+
+.pf-modal__related-item:hover .pf-modal__related-thumb {
+  border-color: var(--color-orange);
+}
+
+.pf-modal__related-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pf-modal__related-title {
+  font-family: var(--font-oswald);
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.pf-modal__related-arrow {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.13);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 150ms;
+}
+
+.pf-modal__related-arrow:hover:not([disabled]) {
+  background: rgba(255,255,255,0.15);
+}
+
+.pf-modal__related-arrow[disabled] {
+  opacity: 0.2;
+  cursor: not-allowed;
 }

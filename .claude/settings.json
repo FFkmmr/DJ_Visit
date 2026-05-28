@@ -56,7 +56,11 @@
       "PowerShell(cd:*)",
       "Skill(update-config)",
       "Bash(railway ssh *)",
-      "Bash(railway run *)"
+      "Bash(railway run *)",
+      "Read(//c/Users/asus/Documents/Универ/базеле 2/**)",
+      "Bash(g++ -std=c++17 -Wall -Wextra -o lab1.exe lab1.cpp)",
+      "Bash(CLOUDINARY_URL=cloudinary://315631547791916:eI6Wt-GxobZJkfb_f-S1-vbM6JQ@dox1auiyy python -c ' *)",
+      "Bash(ffmpeg -version)"
     ],
     "deny": [
       "Bash(rm -rf:*)",
@@ -83,7 +87,10 @@
       "Edit(/c/Program Files/**)",
       "Edit(/etc/**)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": [
+      "c:\\Users\\asus\\Documents\\Универ\\базеле 2"
+    ]
   },
   "enabledMcpjsonServers": [
     "figma"

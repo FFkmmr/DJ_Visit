@@ -21,6 +21,7 @@
             <a href="{{ url_for('main.dm_logout') }}" class="dm-sidebar__logout">Выйти</a>
         </div>
         <button class="dm-btn dm-btn--primary dm-sidebar__new" id="btn-new">+ Новая карточка</button>
+        <button class="dm-btn dm-sidebar__order-btn" id="btn-order">⇅ Порядок карточек</button>
         <ul class="dm-item-list" id="item-list">
             {% for item in items %}
             <li class="dm-item-list__item" data-id="{{ item.id }}" data-item='{{ item | tojson }}'>
@@ -38,6 +39,19 @@
             <p>Выберите карточку или создайте новую</p>
         </div>
 
+        <!-- Order panel -->
+        <div class="dm-order-panel" id="dm-order-panel" style="display:none">
+            <div class="dm-order-panel__head">
+                <h2 class="dm-order-panel__title">Порядок карточек</h2>
+                <p class="dm-order-panel__hint">Перетащите карточки чтобы изменить порядок отображения на сайте</p>
+            </div>
+            <ul class="dm-order-list" id="order-list"></ul>
+            <div class="dm-order-panel__actions">
+                <button class="dm-btn dm-btn--primary" id="btn-save-order">Сохранить порядок</button>
+                <p class="dm-editor__status" id="order-status"></p>
+            </div>
+        </div>
+
         <div class="dm-editor" id="dm-editor" style="display:none">
             <div class="dm-editor__cols">
 
@@ -45,9 +59,19 @@
                 <div class="dm-editor__form-col">
                     <h2 class="dm-editor__heading" id="editor-heading">Новая карточка</h2>
 
-                    <!-- Video upload -->
+                    <!-- Video source selector -->
                     <div class="dm-field">
-                        <label class="dm-label">Видео</label>
+                        <label class="dm-label">Источник видео</label>
+                        <div class="dm-video-source-tabs" id="video-source-tabs">
+                            <button type="button" class="dm-source-tab dm-source-tab--active" data-source="cloudinary">Cloudinary</button>
+                            <button type="button" class="dm-source-tab" data-source="local">Сервер Railway</button>
+                            <button type="button" class="dm-source-tab" data-source="youtube">YouTube</button>
+                        </div>
+                    </div>
+
+                    <!-- Upload area (Cloudinary + Local) -->
+                    <div class="dm-field" id="upload-field">
+                        <label class="dm-label" id="upload-field-label">Видео файл</label>
                         <div class="dm-upload-area" id="upload-area">
                             <div class="dm-upload-area__inner" id="upload-inner">
                                 <span class="dm-upload-area__icon">▶</span>
@@ -66,8 +90,34 @@
                                 <button class="dm-upload-done__reupload" id="btn-reupload" type="button">Заменить</button>
                             </div>
                         </div>
-                        <input type="hidden" id="field-video-url">
                     </div>
+
+                    <!-- YouTube URL input -->
+                    <div class="dm-field" id="youtube-field" style="display:none">
+                        <label class="dm-label" for="field-youtube-url">Ссылка на YouTube</label>
+                        <input class="dm-input" type="url" id="field-youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+                        <p class="dm-field-hint">Поддерживаются: watch?v=, youtu.be/, /shorts/</p>
+                    </div>
+
+                    <!-- Thumbnail upload (Railway only) -->
+                    <div class="dm-field" id="thumb-field" style="display:none">
+                        <label class="dm-label">Обложка (превью)</label>
+                        <div class="dm-thumb-upload" id="thumb-upload-area">
+                            <div class="dm-thumb-upload__inner" id="thumb-inner">
+                                <span class="dm-thumb-upload__icon">🖼</span>
+                                <span class="dm-thumb-upload__text">Загрузить обложку <label class="dm-upload-area__link" for="thumb-file">выбрать</label></span>
+                                <input type="file" id="thumb-file" accept="image/*" class="dm-upload-area__input">
+                            </div>
+                            <div class="dm-thumb-upload__done" id="thumb-done" style="display:none">
+                                <img id="thumb-preview-img" class="dm-thumb-upload__img" src="" alt="">
+                                <button class="dm-upload-done__reupload" id="btn-rethumb" type="button">Заменить</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="field-video-url">
+                    <input type="hidden" id="field-thumb-url">
+                    <input type="hidden" id="field-video-type" value="cloudinary">
 
                     <!-- Title -->
                     <div class="dm-field">
@@ -101,6 +151,15 @@
                             <input class="dm-input dm-custom-tag-input" type="text" id="custom-tag-input" placeholder="Новый тег...">
                             <button type="button" class="dm-btn dm-btn--sm" id="btn-add-custom-tag">Добавить</button>
                         </div>
+                    </div>
+
+                    <!-- Related videos -->
+                    <div class="dm-field" id="related-field" style="display:none">
+                        <label class="dm-label">Связанные видео</label>
+                        <div class="dm-related-preview" id="related-preview">
+                            <span class="dm-related-preview__empty">Нет связанных видео</span>
+                        </div>
+                        <button type="button" class="dm-btn dm-btn--sm dm-related-pick-btn" id="btn-pick-related">Выбрать связанные</button>
                     </div>
 
                     <div class="dm-editor__actions">
@@ -143,10 +202,27 @@
     </main>
 </div>
 
+<!-- Related picker modal -->
+<div class="dm-related-modal" id="dm-related-modal" style="display:none" aria-modal="true" role="dialog">
+    <div class="dm-related-modal__overlay" id="dm-related-overlay"></div>
+    <div class="dm-related-modal__panel">
+        <div class="dm-related-modal__head">
+            <h3 class="dm-related-modal__title">Связанные видео</h3>
+            <button class="dm-related-modal__close" id="dm-related-close" type="button" aria-label="Закрыть">&#x2715;</button>
+        </div>
+        <p class="dm-related-modal__hint">Выберите видео которые будут показаны под плеером в этой карточке</p>
+        <ul class="dm-related-list" id="dm-related-list"></ul>
+        <div class="dm-related-modal__actions">
+            <button class="dm-btn dm-btn--primary" id="btn-related-apply" type="button">Применить</button>
+        </div>
+    </div>
+</div>
+
 <script>
 (function () {
     let currentId = null;
     let selectedTags = [];
+    let currentSource = 'cloudinary'; // 'cloudinary' | 'local' | 'youtube'
 
     // refs
     const editor       = document.getElementById('dm-editor');
@@ -159,10 +235,23 @@
     const itemList     = document.getElementById('item-list');
     const tagsSelect   = document.getElementById('tags-select');
 
-    const fieldTitle   = document.getElementById('field-title');
-    const fieldSub     = document.getElementById('field-subtitle');
-    const fieldDesc    = document.getElementById('field-description');
-    const fieldVideoUrl= document.getElementById('field-video-url');
+    const fieldTitle    = document.getElementById('field-title');
+    const fieldSub      = document.getElementById('field-subtitle');
+    const fieldDesc     = document.getElementById('field-description');
+    const fieldVideoUrl  = document.getElementById('field-video-url');
+    const fieldThumbUrl  = document.getElementById('field-thumb-url');
+    const fieldVideoType = document.getElementById('field-video-type');
+
+    const uploadField     = document.getElementById('upload-field');
+    const youtubeField    = document.getElementById('youtube-field');
+    const thumbField      = document.getElementById('thumb-field');
+    const thumbInner      = document.getElementById('thumb-inner');
+    const thumbDone       = document.getElementById('thumb-done');
+    const thumbPreviewImg = document.getElementById('thumb-preview-img');
+    const thumbFile       = document.getElementById('thumb-file');
+    const btnRethumb      = document.getElementById('btn-rethumb');
+    const fieldYoutubeUrl = document.getElementById('field-youtube-url');
+    const sourceTabs      = document.getElementById('video-source-tabs');
 
     const videoFile    = document.getElementById('video-file');
     const uploadArea   = document.getElementById('upload-area');
@@ -180,9 +269,114 @@
     const previewSub         = document.getElementById('preview-subtitle');
     const previewTags        = document.getElementById('preview-tags');
 
+    // ── video source tabs ──────────────────────────────────────────────────
+    function setSource(source) {
+        currentSource = source;
+        fieldVideoType.value = source;
+
+        sourceTabs.querySelectorAll('.dm-source-tab').forEach(btn => {
+            btn.classList.toggle('dm-source-tab--active', btn.dataset.source === source);
+        });
+
+        uploadField.style.display  = source === 'youtube' ? 'none' : '';
+        youtubeField.style.display = source === 'youtube' ? '' : 'none';
+        thumbField.style.display   = source === 'local' ? '' : 'none';
+
+        if (source !== 'youtube') {
+            fieldYoutubeUrl.value = '';
+        }
+        if (source !== 'local') {
+            fieldThumbUrl.value = '';
+            resetThumbUI();
+        }
+    }
+
+    sourceTabs.addEventListener('click', e => {
+        const btn = e.target.closest('.dm-source-tab');
+        if (!btn) return;
+        const src = btn.dataset.source;
+        if (src === currentSource) return;
+        // switching away from current — clear video
+        fieldVideoUrl.value = '';
+        resetUploadUI();
+        hidePreviewVideo();
+        if (src !== 'youtube') videoFile.value = '';
+        setSource(src);
+    });
+
+    // ── thumbnail upload (Railway) ─────────────────────────────────────────
+    function resetThumbUI() {
+        thumbInner.style.display = '';
+        thumbDone.style.display  = 'none';
+        thumbPreviewImg.src      = '';
+    }
+
+    function showThumbDone(url) {
+        thumbInner.style.display = 'none';
+        thumbDone.style.display  = '';
+        thumbPreviewImg.src      = url;
+    }
+
+    btnRethumb.addEventListener('click', () => {
+        resetThumbUI();
+        fieldThumbUrl.value = '';
+        thumbFile.value     = '';
+    });
+
+    thumbFile.addEventListener('change', () => {
+        const file = thumbFile.files[0];
+        if (file) uploadThumb(file);
+    });
+
+    function uploadThumb(file) {
+        const localId = fieldVideoUrl.value.replace('/api/portfolio-video/', '').trim();
+        if (!localId) {
+            alert('Сначала загрузите видео');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('thumb', file);
+        formData.append('item_id', localId);
+        fetch('/api/dm/upload-thumb-local', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.thumb_url) {
+                    fieldThumbUrl.value = data.thumb_url;
+                    showThumbDone(data.thumb_url);
+                    setPreviewImage(data.thumb_url);
+                }
+            })
+            .catch(() => {});
+    }
+
+    // ── YouTube helpers ────────────────────────────────────────────────────
+    function extractYoutubeId(url) {
+        if (!url) return null;
+        const m = url.match(/(?:youtube\.com\/(?:watch\?.*v=|shorts\/|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        return m ? m[1] : null;
+    }
+
+    function applyYoutubeUrl(url) {
+        const ytId = extractYoutubeId(url);
+        if (ytId) {
+            fieldVideoUrl.value = url;
+            const thumb = 'https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg';
+            setPreviewImage(thumb);
+        } else {
+            fieldVideoUrl.value = '';
+            hidePreviewVideo();
+        }
+    }
+
+    fieldYoutubeUrl.addEventListener('input', () => applyYoutubeUrl(fieldYoutubeUrl.value.trim()));
+    fieldYoutubeUrl.addEventListener('paste', () => {
+        setTimeout(() => applyYoutubeUrl(fieldYoutubeUrl.value.trim()), 0);
+    });
+
     // ── open / close editor ────────────────────────────────────────────────
     function openEditor(item) {
-        placeholder.style.display = 'none';
+        placeholder.style.display  = 'none';
+        orderPanel.style.display   = 'none';
         editor.style.display = 'block';
 
         if (item) {
@@ -209,18 +403,50 @@
         selectedTags = Array.isArray(item.tags) ? [...item.tags]
                        : (item.tag ? [item.tag] : []);
 
-        // ensure all saved tags have a button (custom ones may not exist yet)
         selectedTags.forEach(ensureTagButton);
         renderTagButtons();
         syncPreviewText();
 
-        if (item.video_url) {
+        loadRelatedForItem(item);
+
+        // detect and apply source type
+        const vtype = item.video_type || detectVideoType(item.video_url || '');
+        setSource(vtype);
+
+        fieldThumbUrl.value = item.thumb_url || '';
+
+        if (vtype === 'youtube') {
+            fieldYoutubeUrl.value = item.video_url || '';
+            const ytId = extractYoutubeId(item.video_url || '');
+            if (ytId) setPreviewImage('https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg');
+            else hidePreviewVideo();
+        } else if (item.video_url) {
             showUploadDone(item.video_url);
-            setPreviewVideo(item.video_url);
+            const thumb = item.thumb_url || '';
+            if (thumb && thumb !== item.video_url) {
+                // real thumbnail available
+                setPreviewImage(thumb);
+                if (vtype === 'local' && thumb) {
+                    showThumbDone(thumb);
+                }
+            } else if (vtype === 'cloudinary') {
+                // derive thumbnail from cloudinary URL
+                const derivedThumb = item.video_url.replace('/video/upload/', '/video/upload/so_0,f_jpg,q_auto/').replace(/\.[^.]+$/, '.jpg');
+                setPreviewImage(derivedThumb);
+            } else {
+                setPreviewVideo(item.video_url);
+            }
         } else {
             resetUploadUI();
             hidePreviewVideo();
         }
+    }
+
+    function detectVideoType(url) {
+        if (!url) return 'cloudinary';
+        if (extractYoutubeId(url)) return 'youtube';
+        if (url.startsWith('/api/portfolio-video/')) return 'local';
+        return 'cloudinary';
     }
 
     function clearForm() {
@@ -228,7 +454,14 @@
         fieldSub.value      = '';
         fieldDesc.value     = '';
         fieldVideoUrl.value = '';
+        fieldYoutubeUrl.value = '';
+        fieldThumbUrl.value   = '';
+        resetThumbUI();
         selectedTags = [];
+        selectedRelated = [];
+        relatedField.style.display = 'none';
+        relatedPreview.innerHTML = '<span class="dm-related-preview__empty">Нет связанных видео</span>';
+        setSource('cloudinary');
         renderTagButtons();
         syncPreviewText();
         resetUploadUI();
@@ -324,8 +557,9 @@
 
     [fieldTitle, fieldSub, fieldDesc].forEach(el => el.addEventListener('input', syncPreviewText));
 
-    // ── video upload ───────────────────────────────────────────────────────
+    // ── preview helpers ────────────────────────────────────────────────────
     function setPreviewVideo(url) {
+        clearPreviewImage();
         previewVideo.src = url;
         previewVideo.style.display = '';
         previewPlaceholder.style.display = 'none';
@@ -337,7 +571,29 @@
         previewVideo.pause();
         previewVideo.src = '';
         previewVideo.style.display = 'none';
+        clearPreviewImage();
         previewPlaceholder.style.display = '';
+    }
+
+    function setPreviewImage(src) {
+        previewVideo.pause();
+        previewVideo.src = '';
+        previewVideo.style.display = 'none';
+        let img = previewVideo.parentElement.querySelector('.dm-preview-yt-thumb');
+        if (!img) {
+            img = document.createElement('img');
+            img.className = 'dm-preview-yt-thumb';
+            img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit';
+            previewVideo.parentElement.appendChild(img);
+        }
+        img.src = src;
+        img.style.display = '';
+        previewPlaceholder.style.display = 'none';
+    }
+
+    function clearPreviewImage() {
+        const img = previewVideo.parentElement && previewVideo.parentElement.querySelector('.dm-preview-yt-thumb');
+        if (img) { img.src = ''; img.style.display = 'none'; }
     }
 
     function showUploadDone(url) {
@@ -386,8 +642,12 @@
         const formData = new FormData();
         formData.append('video', file);
 
+        const endpoint = currentSource === 'local'
+            ? '/api/dm/upload-video-local'
+            : '/api/dm/upload-video';
+
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/dm/upload-video');
+        xhr.open('POST', endpoint);
 
         xhr.upload.addEventListener('progress', e => {
             if (e.lengthComputable) {
@@ -407,7 +667,20 @@
                         syncPreviewText();
                     }
                     showUploadDone(data.url);
-                    setPreviewVideo(data.url);
+                    if (currentSource === 'cloudinary') {
+                        // use server-generated thumbnail
+                        if (data.thumb_url) {
+                            fieldThumbUrl.value = data.thumb_url;
+                            setPreviewImage(data.thumb_url);
+                        } else {
+                            setPreviewVideo(data.url);
+                        }
+                    } else {
+                        // local: placeholder until user uploads thumb
+                        clearPreviewImage();
+                        previewPlaceholder.style.display = 'none';
+                        previewVideo.style.display = 'none';
+                    }
                 } else {
                     uploadLabel.textContent = 'Ошибка: ' + (data.error || 'unknown');
                     resetUploadUI();
@@ -439,13 +712,16 @@
 
     // ── save ───────────────────────────────────────────────────────────────
     btnSave.addEventListener('click', async () => {
+        const videoUrl = fieldVideoUrl.value.trim();
+        const thumbUrl = fieldThumbUrl.value.trim();
         const payload = {
             title:       fieldTitle.value.trim(),
             subtitle:    fieldSub.value.trim(),
             description: fieldDesc.value.trim(),
             tags:        selectedTags,
-            video_url:   fieldVideoUrl.value.trim(),
-            thumb_url:   fieldVideoUrl.value.trim(),
+            video_url:   videoUrl,
+            video_type:  currentSource,
+            thumb_url:   currentSource === 'youtube' ? '' : (thumbUrl || videoUrl),
         };
 
         const url    = currentId ? '/api/dm/portfolio/' + currentId : '/api/dm/portfolio';
@@ -461,9 +737,24 @@
             if (!res.ok) throw new Error(await res.text());
             const saved = await res.json();
             setStatus('Сохранено ✓');
+            allPortfolioItems = []; // invalidate cache so picker reloads on next open
 
-            if (!currentId) {
+            const wasNew = !currentId;
+            if (wasNew) {
                 currentId = saved.id;
+            }
+
+            // save related links (needed for new cards where currentId was null)
+            if (selectedRelated.length || wasNew) {
+                await fetch('/api/dm/portfolio/' + currentId + '/related', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ related: selectedRelated }),
+                }).catch(() => {});
+                relatedField.style.display = '';
+            }
+
+            if (wasNew) {
                 heading.textContent = 'Редактировать карточку';
                 btnDelete.style.display = '';
                 const li = document.createElement('li');
@@ -508,6 +799,218 @@
     function esc(str) {
         return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
+
+    // ── related videos ─────────────────────────────────────────────────────
+    const relatedField    = document.getElementById('related-field');
+    const relatedPreview  = document.getElementById('related-preview');
+    const btnPickRelated  = document.getElementById('btn-pick-related');
+    const relatedModal    = document.getElementById('dm-related-modal');
+    const relatedOverlay  = document.getElementById('dm-related-overlay');
+    const relatedClose    = document.getElementById('dm-related-close');
+    const relatedList     = document.getElementById('dm-related-list');
+    const btnRelatedApply = document.getElementById('btn-related-apply');
+
+    let selectedRelated = [];   // current card's related IDs
+    let allPortfolioItems = []; // all cards (for picker)
+
+    async function loadAllPortfolioItems() {
+        if (allPortfolioItems.length) return;
+        try {
+            const res = await fetch('/api/dm/order');
+            allPortfolioItems = await res.json();
+        } catch (e) {}
+    }
+
+    function renderRelatedPreview() {
+        relatedPreview.innerHTML = '';
+        if (!selectedRelated.length) {
+            relatedPreview.innerHTML = '<span class="dm-related-preview__empty">Нет связанных видео</span>';
+            return;
+        }
+        selectedRelated.forEach(id => {
+            const item = allPortfolioItems.find(i => i.id === id);
+            if (!item) return;
+            const wrap = document.createElement('div');
+            wrap.className = 'dm-related-chip';
+            const thumb = item.thumb
+                ? `<img src="${esc(item.thumb)}" class="dm-related-chip__thumb" alt="">`
+                : `<div class="dm-related-chip__thumb dm-related-chip__thumb--empty"></div>`;
+            wrap.innerHTML = thumb + `<span class="dm-related-chip__title">${esc(item.title || '(без названия)')}</span>`;
+            relatedPreview.appendChild(wrap);
+        });
+    }
+
+    async function openRelatedPicker() {
+        await loadAllPortfolioItems();
+        relatedList.innerHTML = '';
+        allPortfolioItems.forEach(item => {
+            if (item.id === currentId) return; // skip self
+            const li = document.createElement('li');
+            li.className = 'dm-related-item';
+            const checked = selectedRelated.includes(item.id) ? 'checked' : '';
+            const thumb = item.thumb
+                ? `<img src="${esc(item.thumb)}" class="dm-related-item__thumb" alt="">`
+                : `<div class="dm-related-item__thumb dm-related-item__thumb--empty"></div>`;
+            li.innerHTML = `
+                <label class="dm-related-item__label">
+                    <input type="checkbox" class="dm-related-item__cb" value="${esc(item.id)}" ${checked}>
+                    ${thumb}
+                    <div class="dm-related-item__info">
+                        <span class="dm-related-item__title">${esc(item.title || '(без названия)')}</span>
+                        <span class="dm-related-item__sub">${esc(item.subtitle || '')}</span>
+                    </div>
+                </label>`;
+            relatedList.appendChild(li);
+        });
+        relatedModal.style.display = '';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeRelatedPicker() {
+        relatedModal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    btnPickRelated.addEventListener('click', openRelatedPicker);
+    relatedClose.addEventListener('click', closeRelatedPicker);
+    relatedOverlay.addEventListener('click', closeRelatedPicker);
+
+    btnRelatedApply.addEventListener('click', async () => {
+        selectedRelated = [...relatedList.querySelectorAll('.dm-related-item__cb:checked')]
+            .map(cb => cb.value);
+        renderRelatedPreview();
+        closeRelatedPicker();
+
+        if (!currentId) return; // new card — save after main save
+        try {
+            await fetch('/api/dm/portfolio/' + currentId + '/related', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ related: selectedRelated }),
+            });
+        } catch (e) {}
+    });
+
+    // populate related when opening existing card
+    function loadRelatedForItem(item) {
+        selectedRelated = Array.isArray(item.related) ? [...item.related] : [];
+        loadAllPortfolioItems().then(renderRelatedPreview);
+        relatedField.style.display = '';
+    }
+
+    // ── order panel ────────────────────────────────────────────────────────
+    const orderPanel  = document.getElementById('dm-order-panel');
+    const orderList   = document.getElementById('order-list');
+    const orderStatus = document.getElementById('order-status');
+    const btnOrder    = document.getElementById('btn-order');
+    const btnSaveOrder= document.getElementById('btn-save-order');
+
+    let dragSrc = null;
+
+    function openOrderPanel() {
+        placeholder.style.display = 'none';
+        editor.style.display      = 'none';
+        orderPanel.style.display  = '';
+        itemList.querySelectorAll('.dm-item-list__item').forEach(el => el.classList.remove('dm-item-list__item--active'));
+        loadOrderPanel();
+    }
+
+    async function loadOrderPanel() {
+        orderList.innerHTML = '<li style="color:#555;padding:12px">Загрузка...</li>';
+        orderStatus.textContent = '';
+        try {
+            const res = await fetch('/api/dm/order');
+            const items = await res.json();
+            renderOrderList(items);
+        } catch (e) {
+            orderList.innerHTML = '<li style="color:#c44;padding:12px">Ошибка загрузки</li>';
+        }
+    }
+
+    function renderOrderList(items) {
+        orderList.innerHTML = '';
+        items.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'dm-order-item';
+            li.draggable = true;
+            li.dataset.id = item.id;
+
+            const thumb = item.thumb
+                ? `<img class="dm-order-item__thumb" src="${esc(item.thumb)}" alt="" loading="lazy">`
+                : `<div class="dm-order-item__thumb dm-order-item__thumb--empty"></div>`;
+
+            li.innerHTML = `
+                <span class="dm-order-item__handle" aria-hidden="true">⠿</span>
+                ${thumb}
+                <div class="dm-order-item__info">
+                    <span class="dm-order-item__title">${esc(item.title || '(без названия)')}</span>
+                    <span class="dm-order-item__sub">${esc(item.subtitle || '')}</span>
+                </div>
+                <span class="dm-order-item__badge dm-order-item__badge--${esc(item.video_type)}">${esc(item.video_type)}</span>
+            `;
+
+            li.addEventListener('dragstart', onDragStart);
+            li.addEventListener('dragover',  onDragOver);
+            li.addEventListener('dragleave', onDragLeave);
+            li.addEventListener('drop',      onDrop);
+            li.addEventListener('dragend',   onDragEnd);
+
+            orderList.appendChild(li);
+        });
+    }
+
+    function onDragStart(e) {
+        dragSrc = this;
+        this.classList.add('dm-order-item--dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', this.dataset.id);
+    }
+    function onDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (this === dragSrc) return;
+        this.classList.add('dm-order-item--over');
+    }
+    function onDragLeave() {
+        this.classList.remove('dm-order-item--over');
+    }
+    function onDrop(e) {
+        e.preventDefault();
+        if (this === dragSrc) return;
+        this.classList.remove('dm-order-item--over');
+        const allItems = [...orderList.querySelectorAll('.dm-order-item')];
+        const srcIdx  = allItems.indexOf(dragSrc);
+        const tgtIdx  = allItems.indexOf(this);
+        if (srcIdx < tgtIdx) {
+            orderList.insertBefore(dragSrc, this.nextSibling);
+        } else {
+            orderList.insertBefore(dragSrc, this);
+        }
+        orderStatus.textContent = '';
+    }
+    function onDragEnd() {
+        this.classList.remove('dm-order-item--dragging');
+        orderList.querySelectorAll('.dm-order-item').forEach(el => el.classList.remove('dm-order-item--over'));
+        dragSrc = null;
+    }
+
+    btnOrder.addEventListener('click', openOrderPanel);
+
+    btnSaveOrder.addEventListener('click', async () => {
+        const order = [...orderList.querySelectorAll('.dm-order-item')].map(el => el.dataset.id);
+        orderStatus.textContent = 'Сохранение...';
+        try {
+            const res = await fetch('/api/dm/order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order }),
+            });
+            if (!res.ok) throw new Error(await res.text());
+            orderStatus.textContent = 'Сохранено ✓';
+        } catch (e) {
+            orderStatus.textContent = 'Ошибка: ' + e.message;
+        }
+    });
 })();
 </script>
 </body>

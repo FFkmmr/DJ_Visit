@@ -1,3 +1,9 @@
 /.claude.zip
 /.env
 /.mcp.json
+app/static/movies/123.png
+app/static/movies/main_backgr_compressed.mp4
+data/portfolio/order.json
+data/portfolio/01/data.json
+data/portfolio/02/data.json
+data/portfolio/05/video.mp4

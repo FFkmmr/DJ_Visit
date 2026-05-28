@@ -599,3 +599,430 @@
   color: #333;
   font-style: italic;
 }
+
+/* ── Video source tabs ────────────────────────────────────────────────────── */
+.dm-video-source-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dm-source-tab {
+  padding: 6px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: transparent;
+  color: rgba(255,255,255,0.55);
+  font-family: var(--font-onest);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 150ms, color 150ms, border-color 150ms;
+}
+
+.dm-source-tab:hover {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+
+.dm-source-tab--active {
+  background: var(--color-orange);
+  border-color: var(--color-orange);
+  color: #000;
+  font-weight: 600;
+}
+
+.dm-source-tab--active:hover {
+  background: var(--color-orange);
+}
+
+.dm-field-hint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+}
+
+/* ── Order panel ──────────────────────────────────────────────────────────── */
+.dm-sidebar__order-btn {
+  width: calc(100% - 32px);
+  margin: 8px 16px 0;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+  text-align: left;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+
+.dm-sidebar__order-btn:hover {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+
+.dm-order-panel {
+  padding: 40px 48px;
+  max-width: 860px;
+}
+
+.dm-order-panel__head {
+  margin-bottom: 32px;
+}
+
+.dm-order-panel__title {
+  font-family: var(--font-oswald);
+  font-size: 28px;
+  font-weight: 400;
+  color: #fff;
+  margin: 0 0 8px;
+}
+
+.dm-order-panel__hint {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  margin: 0;
+}
+
+.dm-order-list {
+  list-style: none;
+  margin: 0 0 32px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dm-order-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: grab;
+  transition: background 120ms, border-color 120ms, opacity 120ms;
+  user-select: none;
+}
+
+.dm-order-item:active { cursor: grabbing; }
+
+.dm-order-item--dragging {
+  opacity: 0.4;
+}
+
+.dm-order-item--over {
+  background: rgba(255,187,0,0.07);
+  border-color: rgba(255,187,0,0.35);
+}
+
+.dm-order-item__handle {
+  font-size: 18px;
+  color: rgba(255,255,255,0.25);
+  flex-shrink: 0;
+  cursor: grab;
+}
+
+.dm-order-item__thumb {
+  width: 80px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: #1a1a1a;
+  display: block;
+}
+
+.dm-order-item__thumb--empty {
+  background: #1a1a1a;
+}
+
+.dm-order-item__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dm-order-item__title {
+  font-family: var(--font-oswald);
+  font-size: 15px;
+  font-weight: 400;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dm-order-item__sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dm-order-item__badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.4);
+  border: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dm-order-item__badge--youtube {
+  background: rgba(255,0,0,0.08);
+  border-color: rgba(255,0,0,0.2);
+  color: #ff6b6b;
+}
+
+.dm-order-item__badge--local {
+  background: rgba(0,200,100,0.08);
+  border-color: rgba(0,200,100,0.2);
+  color: #5de8a0;
+}
+
+.dm-order-panel__actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ── Related videos – editor field ───────────────────────────────────────── */
+.dm-related-pick-btn {
+  margin-top: 10px;
+}
+
+.dm-related-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 0;
+}
+
+.dm-related-preview__empty {
+  font-size: 13px;
+  color: rgba(255,255,255,0.3);
+  font-style: italic;
+  align-self: center;
+}
+
+.dm-related-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 4px 8px 4px 4px;
+  max-width: 160px;
+}
+
+.dm-related-chip__thumb {
+  width: 40px;
+  height: 26px;
+  object-fit: cover;
+  border-radius: 4px;
+  background: #1a1a1a;
+  display: block;
+  flex-shrink: 0;
+}
+
+.dm-related-chip__thumb--empty {
+  background: #222;
+}
+
+.dm-related-chip__title {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Related picker modal ─────────────────────────────────────────────────── */
+.dm-related-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dm-related-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  cursor: pointer;
+}
+
+.dm-related-modal__panel {
+  position: relative;
+  z-index: 1;
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  width: 90vw;
+  max-width: 560px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dm-related-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+  flex-shrink: 0;
+}
+
+.dm-related-modal__title {
+  font-family: var(--font-oswald);
+  font-size: 20px;
+  font-weight: 400;
+  color: #fff;
+  margin: 0;
+}
+
+.dm-related-modal__close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dm-related-modal__hint {
+  padding: 8px 24px 12px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.35);
+  margin: 0;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.dm-related-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+  overflow-y: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+
+.dm-related-item__label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: background 120ms;
+}
+
+.dm-related-item__label:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+.dm-related-item__cb {
+  accent-color: var(--color-orange);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.dm-related-item__thumb {
+  width: 64px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 5px;
+  background: #1a1a1a;
+  display: block;
+  flex-shrink: 0;
+}
+
+.dm-related-item__thumb--empty {
+  background: #222;
+}
+
+.dm-related-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dm-related-item__title {
+  font-family: var(--font-oswald);
+  font-size: 14px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dm-related-item__sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dm-related-modal__actions {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+
+/* ── Thumbnail upload (Railway) ───────────────────────────────────────────── */
+.dm-thumb-upload {
+  border: 1px dashed rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.02);
+}
+
+.dm-thumb-upload__inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+}
+
+.dm-thumb-upload__icon {
+  font-size: 20px;
+}
+
+.dm-thumb-upload__done {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dm-thumb-upload__img {
+  width: 96px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #1a1a1a;
+  display: block;
+}
