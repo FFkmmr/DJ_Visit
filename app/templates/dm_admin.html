@@ -66,6 +66,7 @@
                             <button type="button" class="dm-source-tab dm-source-tab--active" data-source="cloudinary">Cloudinary</button>
                             <button type="button" class="dm-source-tab" data-source="local">Сервер Railway</button>
                             <button type="button" class="dm-source-tab" data-source="youtube">YouTube</button>
+                            <button type="button" class="dm-source-tab" data-source="vimeo">Vimeo</button>
                         </div>
                     </div>
 
@@ -97,6 +98,13 @@
                         <label class="dm-label" for="field-youtube-url">Ссылка на YouTube</label>
                         <input class="dm-input" type="url" id="field-youtube-url" placeholder="https://www.youtube.com/watch?v=...">
                         <p class="dm-field-hint">Поддерживаются: watch?v=, youtu.be/, /shorts/</p>
+                    </div>
+
+                    <!-- Vimeo URL input -->
+                    <div class="dm-field" id="vimeo-field" style="display:none">
+                        <label class="dm-label" for="field-vimeo-url">Ссылка на Vimeo</label>
+                        <input class="dm-input" type="url" id="field-vimeo-url" placeholder="https://vimeo.com/123456789">
+                        <p class="dm-field-hint">Вставьте любую ссылку на видео Vimeo</p>
                     </div>
 
                     <!-- Thumbnail upload (local = required, cloudinary = optional override) -->
@@ -222,7 +230,7 @@
 (function () {
     let currentId = null;
     let selectedTags = [];
-    let currentSource = 'cloudinary'; // 'cloudinary' | 'local' | 'youtube'
+    let currentSource = 'cloudinary'; // 'cloudinary' | 'local' | 'youtube' | 'vimeo'
 
     // refs
     const editor       = document.getElementById('dm-editor');
@@ -251,6 +259,8 @@
     const thumbFile       = document.getElementById('thumb-file');
     const btnRethumb      = document.getElementById('btn-rethumb');
     const fieldYoutubeUrl = document.getElementById('field-youtube-url');
+    const fieldVimeoUrl   = document.getElementById('field-vimeo-url');
+    const vimeoField      = document.getElementById('vimeo-field');
     const sourceTabs      = document.getElementById('video-source-tabs');
 
     const videoFile    = document.getElementById('video-file');
@@ -278,8 +288,9 @@
             btn.classList.toggle('dm-source-tab--active', btn.dataset.source === source);
         });
 
-        uploadField.style.display  = source === 'youtube' ? 'none' : '';
+        uploadField.style.display  = (source === 'youtube' || source === 'vimeo') ? 'none' : '';
         youtubeField.style.display = source === 'youtube' ? '' : 'none';
+        vimeoField.style.display   = source === 'vimeo'   ? '' : 'none';
         // for cloudinary: show thumb block only after video is uploaded (handled in _uploadVideoCloudinary)
         if (source === 'local') {
             thumbField.style.display = '';
@@ -288,9 +299,8 @@
             thumbField.style.display = 'none';
         }
 
-        if (source !== 'youtube') {
-            fieldYoutubeUrl.value = '';
-        }
+        if (source !== 'youtube') fieldYoutubeUrl.value = '';
+        if (source !== 'vimeo')   fieldVimeoUrl.value   = '';
         if (source !== 'local') {
             fieldThumbUrl.value = '';
             resetThumbUI();
@@ -394,6 +404,37 @@
         setTimeout(() => applyYoutubeUrl(fieldYoutubeUrl.value.trim()), 0);
     });
 
+    // ── Vimeo helpers ──────────────────────────────────────────────────────
+    function extractVimeoId(url) {
+        if (!url) return null;
+        const m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+        return m ? m[1] : null;
+    }
+
+    function applyVimeoUrl(url) {
+        const id = extractVimeoId(url);
+        if (id) {
+            fieldVideoUrl.value = url;
+            fetch(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}&width=640`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.thumbnail_url) {
+                        setPreviewImage(data.thumbnail_url);
+                        fieldThumbUrl.value = data.thumbnail_url;
+                    }
+                })
+                .catch(() => {});
+        } else {
+            fieldVideoUrl.value = '';
+            hidePreviewVideo();
+        }
+    }
+
+    fieldVimeoUrl.addEventListener('input', () => applyVimeoUrl(fieldVimeoUrl.value.trim()));
+    fieldVimeoUrl.addEventListener('paste', () => {
+        setTimeout(() => applyVimeoUrl(fieldVimeoUrl.value.trim()), 0);
+    });
+
     // ── open / close editor ────────────────────────────────────────────────
     function openEditor(item) {
         placeholder.style.display  = 'none';
@@ -441,6 +482,10 @@
             const ytId = extractYoutubeId(item.video_url || '');
             if (ytId) setPreviewImage('https://img.youtube.com/vi/' + ytId + '/hqdefault.jpg');
             else hidePreviewVideo();
+        } else if (vtype === 'vimeo') {
+            fieldVimeoUrl.value = item.video_url || '';
+            if (item.thumb_url) setPreviewImage(item.thumb_url);
+            else applyVimeoUrl(item.video_url || '');
         } else if (item.video_url) {
             showUploadDone(item.video_url);
             const thumb = item.thumb_url || '';
@@ -473,6 +518,7 @@
     function detectVideoType(url) {
         if (!url) return 'cloudinary';
         if (extractYoutubeId(url)) return 'youtube';
+        if (extractVimeoId(url))   return 'vimeo';
         if (url.startsWith('/api/portfolio-video/')) return 'local';
         return 'cloudinary';
     }

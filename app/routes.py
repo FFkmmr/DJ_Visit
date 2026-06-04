@@ -49,12 +49,21 @@ def _extract_youtube_id(url):
     return None
 
 
+def _extract_vimeo_id(url):
+    if not url:
+        return None
+    m = re.search(r'vimeo\.com/(?:video/)?(\d+)', url)
+    return m.group(1) if m else None
+
+
 def _detect_video_type(video_url):
     """Infer video_type from URL if not explicitly stored."""
     if not video_url:
         return 'cloudinary'
     if _extract_youtube_id(video_url):
         return 'youtube'
+    if _extract_vimeo_id(video_url):
+        return 'vimeo'
     if video_url.startswith('/api/portfolio-video/'):
         return 'local'
     return 'cloudinary'
@@ -128,6 +137,8 @@ def _load_portfolio_items():
         item['thumbnail'] = thumb
         if item['video_type'] == 'youtube':
             item['youtube_id'] = _extract_youtube_id(item.get('video_url', ''))
+        if item['video_type'] == 'vimeo':
+            item['vimeo_id'] = _extract_vimeo_id(item.get('video_url', ''))
         if 'related' not in item:
             item['related'] = []
         all_items.append(item)
@@ -405,6 +416,8 @@ def dm_portfolio_create():
     item['thumbnail'] = item['thumb_url']
     if video_type == 'youtube':
         item['youtube_id'] = _extract_youtube_id(video_url)
+    if video_type == 'vimeo':
+        item['vimeo_id'] = _extract_vimeo_id(video_url)
     return jsonify(item), 201
 
 
@@ -443,6 +456,8 @@ def dm_portfolio_update(item_id):
     existing['thumbnail'] = existing['thumb_url']
     if new_video_type == 'youtube':
         existing['youtube_id'] = _extract_youtube_id(new_video_url)
+    if new_video_type == 'vimeo':
+        existing['vimeo_id'] = _extract_vimeo_id(new_video_url)
     return jsonify(existing)
 
 
