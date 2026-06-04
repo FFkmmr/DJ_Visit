@@ -8,8 +8,8 @@ load_dotenv()
 cloudinary.config(secure=True)
 
 CLOUDINARY_VIDEOS = {
-    'main_backgr': 'https://res.cloudinary.com/dox1auiyy/video/upload/v1780002091/dj_visit/main_backgr.mp4',
-    'actor_backgr': 'https://res.cloudinary.com/dox1auiyy/video/upload/v1780002097/dj_visit/actor_backgr.mp4',
+    'main_backgr': 'https://res.cloudinary.com/dox1auiyy/video/upload/main_backgr_compressed_bgxsca.mp4',
+    'actor_backgr': 'https://res.cloudinary.com/dox1auiyy/video/upload/actor-backgr_m3cqxj.mp4',
 }
 
 
