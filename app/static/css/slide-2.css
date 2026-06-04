@@ -210,4 +210,7 @@
   .slide-2__typing-body {
     max-width: 220px;
   }
+  .slide-2__desc {
+    top: 390px;
+  }
 }
