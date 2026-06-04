@@ -244,7 +244,9 @@ def dm_upload_video_local():
     os.makedirs(folder, exist_ok=True)
     dest = os.path.join(folder, 'video.mp4')
     try:
-        f.save(dest)
+        import shutil
+        with open(dest, 'wb') as out:
+            shutil.copyfileobj(f.stream, out, length=1024 * 1024)
         url = '/api/portfolio-video/' + new_id
         return jsonify({'url': url, 'local_id': new_id})
     except Exception as e:

@@ -16,4 +16,4 @@ RUN mkdir -p data/portfolio
 EXPOSE 8080
 
 # Run with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "4", "--access-logfile", "-", "--error-logfile", "-", "wsgi:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "4", "--timeout", "600", "--access-logfile", "-", "--error-logfile", "-", "wsgi:app"]
