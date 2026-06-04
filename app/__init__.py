@@ -16,6 +16,9 @@ def create_app():
     config_class = get_config()
     app.config.from_object(config_class)
 
+    # Allow large video uploads (up to 2 GB)
+    app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 * 1024
+
     # Register routes
     from app.routes import main_bp
     app.register_blueprint(main_bp)

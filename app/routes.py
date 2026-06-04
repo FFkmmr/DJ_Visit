@@ -287,34 +287,25 @@ def portfolio_thumb_stream(item_id):
     abort(404)
 
 
-@main_bp.route('/api/dm/upload-video', methods=['POST'])
-def dm_upload_video():
+@main_bp.route('/api/dm/upload-signature', methods=['GET'])
+def dm_upload_signature():
+    """Return a signed upload params for direct browser→Cloudinary upload."""
     if not session.get('dm_auth'):
         abort(403)
-    f = request.files.get('video')
-    if not f:
-        return jsonify({'error': 'No file'}), 400
-    try:
-        result = cloudinary.uploader.upload(
-            f,
-            resource_type='video',
-            folder='dj_visit/portfolio',
-            eager=[{'so': '0', 'format': 'jpg', 'quality': 'auto'}],
-            eager_async=False,
-        )
-        video_url = result['secure_url']
-        # use eager thumbnail if available, else derive it from the video URL
-        if result.get('eager'):
-            thumb_url = result['eager'][0]['secure_url']
-        else:
-            thumb_url = re.sub(
-                r'/video/upload/',
-                '/video/upload/so_0,f_jpg,q_auto/',
-                video_url
-            ).rsplit('.', 1)[0] + '.jpg'
-        return jsonify({'url': video_url, 'thumb_url': thumb_url, 'public_id': result['public_id']})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    import time
+    timestamp = int(time.time())
+    params = {
+        'folder': 'dj_visit/portfolio',
+        'timestamp': timestamp,
+    }
+    signature = cloudinary.utils.api_sign_request(params, cloudinary.config().api_secret)
+    return jsonify({
+        'signature': signature,
+        'timestamp': timestamp,
+        'api_key': cloudinary.config().api_key,
+        'cloud_name': cloudinary.config().cloud_name,
+        'folder': 'dj_visit/portfolio',
+    })
 
 
 @main_bp.route('/api/dm/portfolio', methods=['POST'])

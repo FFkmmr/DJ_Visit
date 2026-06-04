@@ -639,15 +639,19 @@
         uploadFill.style.width       = '0%';
         uploadLabel.textContent      = 'Загрузка...';
 
+        if (currentSource === 'local') {
+            _uploadVideoLocal(file, originalName);
+        } else {
+            _uploadVideoCloudinary(file, originalName);
+        }
+    }
+
+    function _uploadVideoLocal(file, originalName) {
         const formData = new FormData();
         formData.append('video', file);
 
-        const endpoint = currentSource === 'local'
-            ? '/api/dm/upload-video-local'
-            : '/api/dm/upload-video';
-
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', endpoint);
+        xhr.open('POST', '/api/dm/upload-video-local');
 
         xhr.upload.addEventListener('progress', e => {
             if (e.lengthComputable) {
@@ -662,28 +666,73 @@
                 const data = JSON.parse(xhr.responseText);
                 if (data.url) {
                     fieldVideoUrl.value = data.url;
-                    if (!fieldTitle.value.trim()) {
-                        fieldTitle.value = originalName;
-                        syncPreviewText();
-                    }
+                    if (!fieldTitle.value.trim()) { fieldTitle.value = originalName; syncPreviewText(); }
                     showUploadDone(data.url);
-                    if (currentSource === 'cloudinary') {
-                        // use server-generated thumbnail
-                        if (data.thumb_url) {
-                            fieldThumbUrl.value = data.thumb_url;
-                            setPreviewImage(data.thumb_url);
-                        } else {
-                            setPreviewVideo(data.url);
-                        }
-                    } else {
-                        // local: placeholder until user uploads thumb
-                        clearPreviewImage();
-                        previewPlaceholder.style.display = 'none';
-                        previewVideo.style.display = 'none';
-                    }
+                    clearPreviewImage();
+                    previewPlaceholder.style.display = 'none';
+                    previewVideo.style.display = 'none';
                 } else {
                     uploadLabel.textContent = 'Ошибка: ' + (data.error || 'unknown');
                     resetUploadUI();
+                }
+            } catch { resetUploadUI(); }
+        });
+
+        xhr.addEventListener('error', () => {
+            uploadLabel.textContent = 'Ошибка загрузки';
+            setTimeout(resetUploadUI, 2000);
+        });
+
+        xhr.send(formData);
+    }
+
+    async function _uploadVideoCloudinary(file, originalName) {
+        // Step 1: get signed params from our server (tiny request, no video data)
+        let sigData;
+        try {
+            const resp = await fetch('/api/dm/upload-signature');
+            sigData = await resp.json();
+        } catch {
+            uploadLabel.textContent = 'Ошибка получения подписи';
+            setTimeout(resetUploadUI, 2000);
+            return;
+        }
+
+        // Step 2: upload directly from browser to Cloudinary
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('api_key',   sigData.api_key);
+        formData.append('timestamp', sigData.timestamp);
+        formData.append('signature', sigData.signature);
+        formData.append('folder',    sigData.folder);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${sigData.cloud_name}/video/upload`);
+
+        xhr.upload.addEventListener('progress', e => {
+            if (e.lengthComputable) {
+                const pct = Math.round(e.loaded / e.total * 100);
+                uploadFill.style.width  = pct + '%';
+                uploadLabel.textContent = pct + '%';
+            }
+        });
+
+        xhr.addEventListener('load', () => {
+            try {
+                const data = JSON.parse(xhr.responseText);
+                if (data.secure_url) {
+                    const videoUrl = data.secure_url;
+                    const thumbUrl = videoUrl
+                        .replace('/video/upload/', '/video/upload/so_0,f_jpg,q_auto/')
+                        .replace(/\.[^.]+$/, '.jpg');
+                    fieldVideoUrl.value  = videoUrl;
+                    fieldThumbUrl.value  = thumbUrl;
+                    if (!fieldTitle.value.trim()) { fieldTitle.value = originalName; syncPreviewText(); }
+                    showUploadDone(videoUrl);
+                    setPreviewImage(thumbUrl);
+                } else {
+                    uploadLabel.textContent = 'Ошибка: ' + (data.error?.message || 'unknown');
+                    setTimeout(resetUploadUI, 2000);
                 }
             } catch { resetUploadUI(); }
         });
