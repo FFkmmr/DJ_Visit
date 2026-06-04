@@ -99,9 +99,9 @@
                         <p class="dm-field-hint">Поддерживаются: watch?v=, youtu.be/, /shorts/</p>
                     </div>
 
-                    <!-- Thumbnail upload (Railway only) -->
+                    <!-- Thumbnail upload (local = required, cloudinary = optional override) -->
                     <div class="dm-field" id="thumb-field" style="display:none">
-                        <label class="dm-label">Обложка (превью)</label>
+                        <label class="dm-label" id="thumb-field-label">Обложка (превью)</label>
                         <div class="dm-thumb-upload" id="thumb-upload-area">
                             <div class="dm-thumb-upload__inner" id="thumb-inner">
                                 <span class="dm-thumb-upload__icon">🖼</span>
@@ -280,7 +280,13 @@
 
         uploadField.style.display  = source === 'youtube' ? 'none' : '';
         youtubeField.style.display = source === 'youtube' ? '' : 'none';
-        thumbField.style.display   = source === 'local' ? '' : 'none';
+        // for cloudinary: show thumb block only after video is uploaded (handled in _uploadVideoCloudinary)
+        if (source === 'local') {
+            thumbField.style.display = '';
+            document.getElementById('thumb-field-label').textContent = 'Обложка (превью)';
+        } else if (source !== 'cloudinary') {
+            thumbField.style.display = 'none';
+        }
 
         if (source !== 'youtube') {
             fieldYoutubeUrl.value = '';
@@ -329,24 +335,39 @@
     });
 
     function uploadThumb(file) {
-        const localId = fieldVideoUrl.value.replace('/api/portfolio-video/', '').trim();
-        if (!localId) {
+        if (!fieldVideoUrl.value.trim()) {
             alert('Сначала загрузите видео');
             return;
         }
-        const formData = new FormData();
-        formData.append('thumb', file);
-        formData.append('item_id', localId);
-        fetch('/api/dm/upload-thumb-local', { method: 'POST', body: formData })
-            .then(r => r.json())
-            .then(data => {
-                if (data.thumb_url) {
-                    fieldThumbUrl.value = data.thumb_url;
-                    showThumbDone(data.thumb_url);
-                    setPreviewImage(data.thumb_url);
-                }
-            })
-            .catch(() => {});
+        if (currentSource === 'cloudinary') {
+            const formData = new FormData();
+            formData.append('thumb', file);
+            fetch('/api/dm/upload-thumb-cloudinary', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.thumb_url) {
+                        fieldThumbUrl.value = data.thumb_url;
+                        showThumbDone(data.thumb_url);
+                        setPreviewImage(data.thumb_url);
+                    }
+                })
+                .catch(() => {});
+        } else {
+            const localId = fieldVideoUrl.value.replace('/api/portfolio-video/', '').trim();
+            const formData = new FormData();
+            formData.append('thumb', file);
+            formData.append('item_id', localId);
+            fetch('/api/dm/upload-thumb-local', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.thumb_url) {
+                        fieldThumbUrl.value = data.thumb_url;
+                        showThumbDone(data.thumb_url);
+                        setPreviewImage(data.thumb_url);
+                    }
+                })
+                .catch(() => {});
+        }
     }
 
     // ── YouTube helpers ────────────────────────────────────────────────────
@@ -428,11 +449,18 @@
                 setPreviewImage(thumb);
                 if (vtype === 'local' && thumb) {
                     showThumbDone(thumb);
+                } else if (vtype === 'cloudinary') {
+                    document.getElementById('thumb-field-label').textContent = 'Обложка — можно заменить';
+                    thumbField.style.display = '';
+                    showThumbDone(thumb);
                 }
             } else if (vtype === 'cloudinary') {
                 // derive thumbnail from cloudinary URL
                 const derivedThumb = item.video_url.replace('/video/upload/', '/video/upload/so_0,f_jpg,q_auto/').replace(/\.[^.]+$/, '.jpg');
                 setPreviewImage(derivedThumb);
+                document.getElementById('thumb-field-label').textContent = 'Обложка (авто) — можно заменить';
+                thumbField.style.display = '';
+                showThumbDone(derivedThumb);
             } else {
                 setPreviewVideo(item.video_url);
             }
@@ -730,6 +758,10 @@
                     if (!fieldTitle.value.trim()) { fieldTitle.value = originalName; syncPreviewText(); }
                     showUploadDone(videoUrl);
                     setPreviewImage(thumbUrl);
+                    // show thumb block so user can replace auto-generated thumbnail
+                    document.getElementById('thumb-field-label').textContent = 'Обложка (авто) — можно заменить';
+                    thumbField.style.display = '';
+                    showThumbDone(thumbUrl);
                 } else {
                     uploadLabel.textContent = 'Ошибка: ' + (data.error?.message || 'unknown');
                     setTimeout(resetUploadUI, 2000);

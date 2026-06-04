@@ -253,6 +253,27 @@ def dm_upload_video_local():
         return jsonify({'error': str(e)}), 500
 
 
+@main_bp.route('/api/dm/upload-thumb-cloudinary', methods=['POST'])
+def dm_upload_thumb_cloudinary():
+    """Upload custom thumbnail image to Cloudinary for a cloudinary-type video."""
+    if not session.get('dm_auth'):
+        abort(403)
+    f = request.files.get('thumb')
+    if not f:
+        return jsonify({'error': 'No file'}), 400
+    try:
+        result = cloudinary.uploader.upload(
+            f,
+            resource_type='image',
+            folder='dj_visit/portfolio/thumbs',
+            format='jpg',
+            quality='auto',
+        )
+        return jsonify({'thumb_url': result['secure_url']})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @main_bp.route('/api/dm/upload-thumb-local', methods=['POST'])
 def dm_upload_thumb_local():
     """Upload thumbnail image for a locally stored video."""
