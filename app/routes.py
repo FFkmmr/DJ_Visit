@@ -223,12 +223,55 @@ def dm_logout():
 
 @main_bp.route('/api/portfolio-video/<item_id>')
 def portfolio_video_stream(item_id):
-    """Serve locally stored portfolio video from Railway /data volume."""
+    """Serve locally stored portfolio video with byte-range support."""
+    from flask import Response, stream_with_context
     safe_id = re.sub(r'[^a-zA-Z0-9_-]', '', item_id)
     video_path = os.path.join(PORTFOLIO_DIR, safe_id, 'video.mp4')
     if not os.path.isfile(video_path):
         abort(404)
-    return send_file(video_path, mimetype='video/mp4', conditional=True)
+
+    file_size = os.path.getsize(video_path)
+    range_header = request.headers.get('Range')
+    chunk = 1024 * 1024  # 1 MB chunks
+
+    if range_header:
+        # parse "bytes=start-end"
+        byte_range = range_header.replace('bytes=', '').split('-')
+        start = int(byte_range[0])
+        end = int(byte_range[1]) if byte_range[1] else min(start + chunk - 1, file_size - 1)
+        length = end - start + 1
+
+        def generate():
+            with open(video_path, 'rb') as f:
+                f.seek(start)
+                remaining = length
+                while remaining > 0:
+                    data = f.read(min(chunk, remaining))
+                    if not data:
+                        break
+                    remaining -= len(data)
+                    yield data
+
+        resp = Response(stream_with_context(generate()), 206,
+                        mimetype='video/mp4', direct_passthrough=True)
+        resp.headers['Content-Range'] = f'bytes {start}-{end}/{file_size}'
+        resp.headers['Content-Length'] = length
+    else:
+        def generate():
+            with open(video_path, 'rb') as f:
+                while True:
+                    data = f.read(chunk)
+                    if not data:
+                        break
+                    yield data
+
+        resp = Response(stream_with_context(generate()), 200,
+                        mimetype='video/mp4', direct_passthrough=True)
+        resp.headers['Content-Length'] = file_size
+
+    resp.headers['Accept-Ranges'] = 'bytes'
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    return resp
 
 
 @main_bp.route('/api/dm/upload-video-local', methods=['POST'])

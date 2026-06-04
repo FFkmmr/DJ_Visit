@@ -715,12 +715,20 @@
     }
 
     async function _uploadVideoCloudinary(file, originalName) {
-        // Step 1: get signed params from our server (tiny request, no video data)
+        const log = (...args) => console.log('[CLD UPLOAD]', ...args);
+        const logErr = (...args) => console.error('[CLD UPLOAD]', ...args);
+
+        log(`Файл: ${file.name}, размер: ${(file.size / 1024 / 1024).toFixed(1)} МБ, тип: ${file.type}`);
+
+        // Step 1: get signed params from our server
+        log('Запрашиваю подпись...');
         let sigData;
         try {
             const resp = await fetch('/api/dm/upload-signature');
             sigData = await resp.json();
-        } catch {
+            log('Подпись получена:', { api_key: sigData.api_key, timestamp: sigData.timestamp, cloud_name: sigData.cloud_name, folder: sigData.folder });
+        } catch (e) {
+            logErr('Не удалось получить подпись:', e);
             uploadLabel.textContent = 'Ошибка получения подписи';
             setTimeout(resetUploadUI, 2000);
             return;
@@ -734,18 +742,34 @@
         formData.append('signature', sigData.signature);
         formData.append('folder',    sigData.folder);
 
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', `https://api.cloudinary.com/v1_1/${sigData.cloud_name}/video/upload`);
+        const uploadUrl = `https://api.cloudinary.com/v1_1/${sigData.cloud_name}/video/upload`;
+        log('Начинаю загрузку на:', uploadUrl);
 
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', uploadUrl);
+
+        let lastLoggedPct = -1;
         xhr.upload.addEventListener('progress', e => {
             if (e.lengthComputable) {
                 const pct = Math.round(e.loaded / e.total * 100);
                 uploadFill.style.width  = pct + '%';
                 uploadLabel.textContent = pct + '%';
+                if (pct !== lastLoggedPct && pct % 5 === 0) {
+                    log(`Прогресс: ${pct}% (${(e.loaded / 1024 / 1024).toFixed(1)} / ${(e.total / 1024 / 1024).toFixed(1)} МБ)`);
+                    lastLoggedPct = pct;
+                }
+            } else {
+                log('Прогресс: размер неизвестен, загружено:', (e.loaded / 1024 / 1024).toFixed(1), 'МБ');
             }
         });
 
+        xhr.upload.addEventListener('loadstart', () => log('Загрузка началась'));
+        xhr.upload.addEventListener('loadend',   () => log('Загрузка завершена (данные отправлены), ждём ответа Cloudinary...'));
+        xhr.upload.addEventListener('abort',     () => { logErr('Загрузка прервана (abort)'); uploadLabel.textContent = 'Загрузка прервана'; setTimeout(resetUploadUI, 2000); });
+
         xhr.addEventListener('load', () => {
+            log('Ответ от Cloudinary, статус:', xhr.status);
+            log('Тело ответа:', xhr.responseText.slice(0, 500));
             try {
                 const data = JSON.parse(xhr.responseText);
                 if (data.secure_url) {
@@ -753,23 +777,28 @@
                     const thumbUrl = videoUrl
                         .replace('/video/upload/', '/video/upload/so_0,f_jpg,q_auto/')
                         .replace(/\.[^.]+$/, '.jpg');
+                    log('Успех! URL:', videoUrl);
                     fieldVideoUrl.value  = videoUrl;
                     fieldThumbUrl.value  = thumbUrl;
                     if (!fieldTitle.value.trim()) { fieldTitle.value = originalName; syncPreviewText(); }
                     showUploadDone(videoUrl);
                     setPreviewImage(thumbUrl);
-                    // show thumb block so user can replace auto-generated thumbnail
                     document.getElementById('thumb-field-label').textContent = 'Обложка (авто) — можно заменить';
                     thumbField.style.display = '';
                     showThumbDone(thumbUrl);
                 } else {
+                    logErr('Cloudinary вернул ошибку:', data.error);
                     uploadLabel.textContent = 'Ошибка: ' + (data.error?.message || 'unknown');
                     setTimeout(resetUploadUI, 2000);
                 }
-            } catch { resetUploadUI(); }
+            } catch (e) {
+                logErr('Не удалось распарсить ответ:', e);
+                resetUploadUI();
+            }
         });
 
         xhr.addEventListener('error', () => {
+            logErr('Сетевая ошибка XHR (статус:', xhr.status, ')');
             uploadLabel.textContent = 'Ошибка загрузки';
             setTimeout(resetUploadUI, 2000);
         });
