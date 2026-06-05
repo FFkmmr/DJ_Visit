@@ -247,10 +247,22 @@ var Portfolio = (function () {
   }
 
   // ── modal ──────────────────────────────────────────────────────────────
-  function openModal(itemId) {
+  function openModal(itemId, preloadedItem) {
+    if (preloadedItem && preloadedItem.hidden) {
+      showModalItem(preloadedItem);
+      return;
+    }
     rebuildVisibleIds();
     var idx = visibleIds.indexOf(itemId);
     showModalAt(idx === -1 ? 0 : idx);
+  }
+
+  function showModalItem(item) {
+    if (!modalEl) return;
+    modalIndex = -1;
+    populateModal(item);
+    modalEl.removeAttribute('hidden');
+    document.body.style.overflow = 'hidden';
   }
 
   function showModalAt(idx) {
@@ -260,6 +272,20 @@ var Portfolio = (function () {
     var item = allItems.find(function (i) { return i.id === visibleIds[idx]; });
     if (!item) return;
 
+    populateModal(item);
+
+    var isFirst = idx === 0;
+    var isLast  = idx === visibleIds.length - 1;
+    modalPrev.disabled = isFirst;
+    modalNext.disabled = isLast;
+    if (modalPrevM) modalPrevM.disabled = isFirst;
+    if (modalNextM) modalNextM.disabled = isLast;
+
+    modalEl.removeAttribute('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function populateModal(item) {
     document.querySelectorAll('.portfolio-card video').forEach(function (v) { v.pause(); });
 
     modalTitle.textContent    = item.title || '';
@@ -316,16 +342,19 @@ var Portfolio = (function () {
     }
 
     renderRelated(item);
+  }
 
-    var isFirst = idx === 0;
-    var isLast  = idx === visibleIds.length - 1;
-    modalPrev.disabled = isFirst;
-    modalNext.disabled = isLast;
-    if (modalPrevM) modalPrevM.disabled = isFirst;
-    if (modalNextM) modalNextM.disabled = isLast;
+  var hiddenItemCache = {};
 
-    modalEl.removeAttribute('hidden');
-    document.body.style.overflow = 'hidden';
+  function fetchHiddenItem(rid) {
+    if (hiddenItemCache[rid]) return Promise.resolve(hiddenItemCache[rid]);
+    return fetch('/api/portfolio/' + rid)
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (data) hiddenItemCache[rid] = data;
+        return data;
+      })
+      .catch(function () { return null; });
   }
 
   function renderRelated(item) {
@@ -338,42 +367,57 @@ var Portfolio = (function () {
     }
 
     relatedTrack.innerHTML = '';
-    related.forEach(function (rid) {
+    relatedEl.setAttribute('hidden', '');
+
+    var promises = related.map(function (rid) {
       var rel = allItems.find(function (i) { return i.id === rid; });
-      if (!rel) return;
-
-      var ytId = rel.youtube_id || extractYoutubeId(rel.video_url);
-      var isYt = rel.video_type === 'youtube' || !!ytId;
-      var thumbSrc = isYt && ytId
-        ? youtubeThumbnail(ytId)
-        : (rel.thumbnail || rel.thumb_url || '');
-
-      var li = document.createElement('li');
-      li.className = 'pf-modal__related-item';
-
-      var imgWrap = document.createElement('div');
-      imgWrap.className = 'pf-modal__related-thumb';
-      if (thumbSrc) {
-        var img = document.createElement('img');
-        img.src = thumbSrc;
-        img.alt = escapeHtml(rel.title);
-        img.loading = 'lazy';
-        imgWrap.appendChild(img);
-      }
-
-      var title = document.createElement('span');
-      title.className = 'pf-modal__related-title';
-      title.textContent = rel.title || '';
-
-      li.appendChild(imgWrap);
-      li.appendChild(title);
-      li.addEventListener('click', function () { openModal(rid); });
-      relatedTrack.appendChild(li);
+      if (rel) return Promise.resolve(rel);
+      return fetchHiddenItem(rid);
     });
 
-    relatedEl.removeAttribute('hidden');
-    relatedTrack.scrollLeft = 0;
-    updateRelatedArrows();
+    Promise.all(promises).then(function (rels) {
+      relatedTrack.innerHTML = '';
+      var anyVisible = false;
+      rels.forEach(function (rel, idx) {
+        if (!rel) return;
+        var rid = related[idx];
+        anyVisible = true;
+
+        var ytId = rel.youtube_id || extractYoutubeId(rel.video_url);
+        var isYt = rel.video_type === 'youtube' || !!ytId;
+        var thumbSrc = isYt && ytId
+          ? youtubeThumbnail(ytId)
+          : (rel.thumbnail || rel.thumb_url || '');
+
+        var li = document.createElement('li');
+        li.className = 'pf-modal__related-item';
+
+        var imgWrap = document.createElement('div');
+        imgWrap.className = 'pf-modal__related-thumb';
+        if (thumbSrc) {
+          var img = document.createElement('img');
+          img.src = thumbSrc;
+          img.alt = escapeHtml(rel.title);
+          img.loading = 'lazy';
+          imgWrap.appendChild(img);
+        }
+
+        var title = document.createElement('span');
+        title.className = 'pf-modal__related-title';
+        title.textContent = rel.title || '';
+
+        li.appendChild(imgWrap);
+        li.appendChild(title);
+        li.addEventListener('click', function () { openModal(rid, rel); });
+        relatedTrack.appendChild(li);
+      });
+
+      if (anyVisible) {
+        relatedEl.removeAttribute('hidden');
+        relatedTrack.scrollLeft = 0;
+        updateRelatedArrows();
+      }
+    });
   }
 
   function updateRelatedArrows() {

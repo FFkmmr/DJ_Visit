@@ -522,6 +522,37 @@ def dm_upload_signature():
     })
 
 
+@main_bp.route('/api/portfolio/<item_id>')
+def portfolio_item(item_id):
+    """Get a single portfolio item by ID (including hidden ones — for related links)."""
+    safe_id = re.sub(r'[^a-zA-Z0-9_-]', '', item_id)
+    data_file = os.path.join(PORTFOLIO_DIR, safe_id, 'data.json')
+    if not os.path.isfile(data_file):
+        abort(404)
+    with open(data_file, 'r', encoding='utf-8-sig') as f:
+        item = json.load(f)
+    item['id'] = safe_id
+    primary_tag = item.get('tag', '')
+    item['category'] = TAG_TO_CATEGORY.get(primary_tag, primary_tag) if primary_tag else ''
+    all_tags = item.get('tags', [primary_tag] if primary_tag else [])
+    item['categories'] = list(dict.fromkeys(TAG_TO_CATEGORY.get(t, t) for t in all_tags if t))
+    if 'video_type' not in item:
+        item['video_type'] = _detect_video_type(item.get('video_url', ''))
+    thumb = item.get('thumb_url', '')
+    vurl  = item.get('video_url', '')
+    if item['video_type'] == 'cloudinary' and vurl and (not thumb or thumb == vurl):
+        thumb = re.sub(r'/video/upload/', '/video/upload/so_0,f_jpg,q_auto/', vurl).rsplit('.', 1)[0] + '.jpg'
+        item['thumb_url'] = thumb
+    item['thumbnail'] = thumb
+    if item['video_type'] == 'youtube':
+        item['youtube_id'] = _extract_youtube_id(item.get('video_url', ''))
+    if item['video_type'] == 'vimeo':
+        item['vimeo_id'] = _extract_vimeo_id(item.get('video_url', ''))
+    if 'related' not in item:
+        item['related'] = []
+    return jsonify(item)
+
+
 @main_bp.route('/api/dm/portfolio', methods=['POST'])
 def dm_portfolio_create():
     if not session.get('dm_auth'):
