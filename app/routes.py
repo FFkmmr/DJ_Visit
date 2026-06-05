@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, jsonify, request, session, redirect, url_for, abort, send_file
+from flask import Blueprint, render_template, jsonify, request, session, redirect, url_for, abort, send_file, current_app
 import os
 import re
 import json
@@ -335,16 +335,26 @@ def dm_upload_video_beget():
     remote_name = new_id + '.mp4'
     remote_path = media_dir.rstrip('/') + '/' + remote_name
 
+    import traceback
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(host, username=user, password=password, timeout=30)
+        ssh.connect(host, username=user, password=password, timeout=30,
+                    banner_timeout=60, auth_timeout=60)
         sftp = ssh.open_sftp()
-        sftp.putfo(f.stream, remote_path)
+        sftp.get_channel().settimeout(600)
+        # Save to temp file first — f.stream may be partially consumed by Flask
+        import tempfile, shutil
+        with tempfile.SpooledTemporaryFile(max_size=512 * 1024 * 1024) as tmp:
+            shutil.copyfileobj(f.stream, tmp, length=1024 * 1024)
+            tmp.seek(0)
+            sftp.putfo(tmp, remote_path)
         sftp.close()
         ssh.close()
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        tb = traceback.format_exc()
+        current_app.logger.error('Beget SFTP upload failed: %s\n%s', e, tb)
+        return jsonify({'error': repr(e)}), 500
 
     url = media_url + '/' + remote_name
     return jsonify({'url': url, 'video_type': 'direct'})
