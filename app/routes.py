@@ -442,10 +442,10 @@ def dm_import_server_video():
     video_file = data.get('video', '').strip()
     thumb_file = data.get('thumb', '').strip()
 
-    # Sanitise — no path traversal
-    safe_folder = re.sub(r'[^a-zA-Z0-9_\-]', '', folder)
-    safe_video  = re.sub(r'[^a-zA-Z0-9_\-\.]', '', video_file)
-    safe_thumb  = re.sub(r'[^a-zA-Z0-9_\-\.]', '', thumb_file) if thumb_file else ''
+    # Sanitise — block path traversal but allow unicode filenames
+    safe_folder = os.path.basename(folder)
+    safe_video  = os.path.basename(video_file)
+    safe_thumb  = os.path.basename(thumb_file) if thumb_file else ''
 
     src_video = os.path.join(MOVIES_DIR, safe_folder, safe_video)
     if not os.path.isfile(src_video):
