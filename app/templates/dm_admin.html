@@ -25,7 +25,7 @@
         <ul class="dm-item-list" id="item-list">
             {% for item in items %}
             <li class="dm-item-list__item" data-id="{{ item.id }}" data-item='{{ item | tojson }}'>
-                <span class="dm-item-list__title">{{ item.title or '(без названия)' }}</span>
+                <span class="dm-item-list__title">{{ item.title or '(без названия)' }}{% if item.hidden %} 👻{% endif %}</span>
                 <span class="dm-item-list__sub">{{ item.subtitle or '' }}</span>
             </li>
             {% endfor %}
@@ -207,6 +207,14 @@
                         <button type="button" class="dm-btn dm-btn--sm dm-related-pick-btn" id="btn-pick-related">Выбрать связанные</button>
                     </div>
 
+                    <div class="dm-field dm-field--inline">
+                        <label class="dm-label dm-label--checkbox">
+                            <input type="checkbox" id="field-hidden">
+                            Скрытая карточка (призрак)
+                        </label>
+                        <p class="dm-field-hint">Не отображается в портфолио, но доступна как связанное видео</p>
+                    </div>
+
                     <div class="dm-editor__actions">
                         <button class="dm-btn dm-btn--primary" id="btn-save" type="button">Сохранить</button>
                         <button class="dm-btn dm-btn--danger" id="btn-delete" type="button" style="display:none">Удалить</button>
@@ -287,6 +295,7 @@
     const fieldVideoUrl  = document.getElementById('field-video-url');
     const fieldThumbUrl  = document.getElementById('field-thumb-url');
     const fieldVideoType = document.getElementById('field-video-type');
+    const fieldHidden    = document.getElementById('field-hidden');
 
     const uploadField     = document.getElementById('upload-field');
     const youtubeField    = document.getElementById('youtube-field');
@@ -518,6 +527,7 @@
         fieldSub.value      = item.subtitle || '';
         fieldDesc.value     = item.description || '';
         fieldVideoUrl.value = item.video_url || '';
+        fieldHidden.checked = !!item.hidden;
 
         selectedTags = Array.isArray(item.tags) ? [...item.tags]
                        : (item.tag ? [item.tag] : []);
@@ -585,9 +595,10 @@
         fieldTitle.value    = '';
         fieldSub.value      = '';
         fieldDesc.value     = '';
-        fieldVideoUrl.value = '';
+        fieldVideoUrl.value   = '';
         fieldYoutubeUrl.value = '';
         fieldThumbUrl.value   = '';
+        fieldHidden.checked   = false;
         resetThumbUI();
         resetServerBrowserUI();
         serverFolders = null;
@@ -1056,6 +1067,7 @@
             video_url:   videoUrl,
             video_type:  (currentSource === 'server' || currentSource === 'local') ? 'local' : currentSource,
             thumb_url:   currentSource === 'youtube' ? '' : (thumbUrl || videoUrl),
+            hidden:      fieldHidden.checked,
         };
 
         const url    = currentId ? '/api/dm/portfolio/' + currentId : '/api/dm/portfolio';
@@ -1095,7 +1107,7 @@
                 li.className = 'dm-item-list__item dm-item-list__item--active';
                 li.dataset.id   = saved.id;
                 li.dataset.item = JSON.stringify(saved);
-                li.innerHTML = '<span class="dm-item-list__title">' + esc(saved.title || '(без названия)') + '</span>'
+                li.innerHTML = '<span class="dm-item-list__title">' + esc(saved.title || '(без названия)') + (saved.hidden ? ' 👻' : '') + '</span>'
                              + '<span class="dm-item-list__sub">'   + esc(saved.subtitle || '') + '</span>';
                 itemList.appendChild(li);
             } else {

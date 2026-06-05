@@ -203,6 +203,8 @@ def portfolio_api():
 
     all_items = _load_portfolio_items()
 
+    all_items = [i for i in all_items if not i.get('hidden')]
+
     if category_filter and category_filter != 'all':
         all_items = [i for i in all_items if i.get('category') == category_filter]
 
@@ -529,6 +531,7 @@ def dm_portfolio_create():
         'video_url':   video_url,
         'video_type':  video_type,
         'thumb_url':   data.get('thumb_url', ''),
+        'hidden':      bool(data.get('hidden', False)),
     }
     with open(os.path.join(folder, 'data.json'), 'w', encoding='utf-8') as f:
         json.dump(item, f, ensure_ascii=False, indent=2)
@@ -569,6 +572,7 @@ def dm_portfolio_update(item_id):
         'video_url':   new_video_url,
         'video_type':  new_video_type,
         'thumb_url':   patch.get('thumb_url', existing.get('thumb_url', '')),
+        'hidden':      bool(patch.get('hidden', existing.get('hidden', False))),
     })
     with open(data_file, 'w', encoding='utf-8') as f:
         json.dump(existing, f, ensure_ascii=False, indent=2)
