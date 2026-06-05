@@ -1054,7 +1054,7 @@
             description: fieldDesc.value.trim(),
             tags:        selectedTags,
             video_url:   videoUrl,
-            video_type:  currentSource === 'beget' ? 'direct' : currentSource,
+            video_type:  (currentSource === 'server' || currentSource === 'local') ? 'local' : currentSource,
             thumb_url:   currentSource === 'youtube' ? '' : (thumbUrl || videoUrl),
         };
 
