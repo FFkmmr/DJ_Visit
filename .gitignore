@@ -7,3 +7,6 @@ data/portfolio/order.json
 data/portfolio/01/data.json
 data/portfolio/02/data.json
 data/portfolio/05/video.mp4
+
+# Server video library — uploaded manually, not tracked in git
+data/movies/

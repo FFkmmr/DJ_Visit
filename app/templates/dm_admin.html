@@ -64,8 +64,8 @@
                         <label class="dm-label">Источник видео</label>
                         <div class="dm-video-source-tabs" id="video-source-tabs">
                             <button type="button" class="dm-source-tab dm-source-tab--active" data-source="cloudinary">Cloudinary</button>
-                            <button type="button" class="dm-source-tab" data-source="local">Сервер Railway</button>
-                            <button type="button" class="dm-source-tab" data-source="beget">Beget</button>
+                            <button type="button" class="dm-source-tab" data-source="local">Загрузить файл</button>
+                            <button type="button" class="dm-source-tab" data-source="server">С сервера</button>
                             <button type="button" class="dm-source-tab" data-source="youtube">YouTube</button>
                             <button type="button" class="dm-source-tab" data-source="vimeo">Vimeo</button>
                         </div>
@@ -106,6 +106,42 @@
                         <label class="dm-label" for="field-vimeo-url">Ссылка на Vimeo</label>
                         <input class="dm-input" type="url" id="field-vimeo-url" placeholder="https://vimeo.com/123456789">
                         <p class="dm-field-hint">Вставьте любую ссылку на видео Vimeo</p>
+                    </div>
+
+                    <!-- Server browser -->
+                    <div class="dm-field" id="server-browser-field" style="display:none">
+                        <label class="dm-label">Видео на сервере</label>
+                        <div class="dm-server-browser" id="server-browser">
+                            <div class="dm-server-browser__loading" id="server-browser-loading">Загрузка списка...</div>
+                            <div id="server-folder-list" style="display:none">
+                                <select class="dm-input" id="server-folder-select">
+                                    <option value="">— выберите папку —</option>
+                                </select>
+                            </div>
+                            <div id="server-file-panel" style="display:none">
+                                <div class="dm-server-file-row">
+                                    <div class="dm-field">
+                                        <label class="dm-label dm-label--sm">Видеофайл</label>
+                                        <select class="dm-input" id="server-video-select">
+                                            <option value="">— выберите файл —</option>
+                                        </select>
+                                    </div>
+                                    <div class="dm-field">
+                                        <label class="dm-label dm-label--sm">Превьюшка</label>
+                                        <select class="dm-input" id="server-thumb-select">
+                                            <option value="">— авто / нет —</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="button" class="dm-btn dm-btn--primary" id="btn-server-import" style="margin-top:8px">Импортировать</button>
+                                <p class="dm-server-browser__hint">Файл будет скопирован в портфолио на сервере</p>
+                            </div>
+                            <div id="server-import-done" style="display:none">
+                                <span class="dm-upload-done__icon">✓</span>
+                                <span id="server-import-done-text" class="dm-upload-done__text">Импортировано</span>
+                                <button class="dm-upload-done__reupload" id="btn-server-reimport" type="button">Выбрать другое</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Thumbnail upload (local = required, cloudinary = optional override) -->
@@ -231,7 +267,8 @@
 (function () {
     let currentId = null;
     let selectedTags = [];
-    let currentSource = 'cloudinary'; // 'cloudinary' | 'local' | 'youtube' | 'vimeo'
+    let currentSource = 'cloudinary'; // 'cloudinary' | 'local' | 'server' | 'youtube' | 'vimeo'
+    let serverFolders = null; // cached folder list
 
     // refs
     const editor       = document.getElementById('dm-editor');
@@ -262,7 +299,18 @@
     const fieldYoutubeUrl = document.getElementById('field-youtube-url');
     const fieldVimeoUrl   = document.getElementById('field-vimeo-url');
     const vimeoField      = document.getElementById('vimeo-field');
-    const sourceTabs      = document.getElementById('video-source-tabs');
+    const sourceTabs          = document.getElementById('video-source-tabs');
+    const serverBrowserField  = document.getElementById('server-browser-field');
+    const serverBrowserLoading= document.getElementById('server-browser-loading');
+    const serverFolderList    = document.getElementById('server-folder-list');
+    const serverFolderSelect  = document.getElementById('server-folder-select');
+    const serverFilePanel     = document.getElementById('server-file-panel');
+    const serverVideoSelect   = document.getElementById('server-video-select');
+    const serverThumbSelect   = document.getElementById('server-thumb-select');
+    const btnServerImport     = document.getElementById('btn-server-import');
+    const serverImportDone    = document.getElementById('server-import-done');
+    const serverImportDoneText= document.getElementById('server-import-done-text');
+    const btnServerReimport   = document.getElementById('btn-server-reimport');
 
     const videoFile    = document.getElementById('video-file');
     const uploadArea   = document.getElementById('upload-area');
@@ -283,32 +331,37 @@
     // ── video source tabs ──────────────────────────────────────────────────
     function setSource(source) {
         currentSource = source;
-        fieldVideoType.value = source;
+        fieldVideoType.value = source === 'server' ? 'local' : source;
 
         sourceTabs.querySelectorAll('.dm-source-tab').forEach(btn => {
             btn.classList.toggle('dm-source-tab--active', btn.dataset.source === source);
         });
 
-        uploadField.style.display  = (source === 'youtube' || source === 'vimeo') ? 'none' : '';
-        youtubeField.style.display = source === 'youtube' ? '' : 'none';
-        vimeoField.style.display   = source === 'vimeo'   ? '' : 'none';
-        // for cloudinary: show thumb block only after video is uploaded (handled in _uploadVideoCloudinary)
+        const isUpload = source !== 'youtube' && source !== 'vimeo' && source !== 'server';
+        uploadField.style.display        = isUpload ? '' : 'none';
+        youtubeField.style.display       = source === 'youtube' ? '' : 'none';
+        vimeoField.style.display         = source === 'vimeo'   ? '' : 'none';
+        serverBrowserField.style.display = source === 'server'  ? '' : 'none';
+
         if (source === 'local') {
             thumbField.style.display = '';
             document.getElementById('thumb-field-label').textContent = 'Обложка (превью)';
-        } else if (source === 'beget') {
-            thumbField.style.display = '';
-            document.getElementById('thumb-field-label').textContent = 'Обложка (превью)';
+        } else if (source === 'server') {
+            thumbField.style.display = 'none';
         } else if (source !== 'cloudinary') {
             thumbField.style.display = 'none';
         }
 
         if (source !== 'youtube') fieldYoutubeUrl.value = '';
         if (source !== 'vimeo')   fieldVimeoUrl.value   = '';
-        if (source !== 'local' && source !== 'beget') {
+        if (source === 'server') {
+            // keep thumb/video url — will be set by import
+        } else if (source !== 'local') {
             fieldThumbUrl.value = '';
             resetThumbUI();
         }
+
+        if (source === 'server') initServerBrowser();
     }
 
     sourceTabs.addEventListener('click', e => {
@@ -316,9 +369,9 @@
         if (!btn) return;
         const src = btn.dataset.source;
         if (src === currentSource) return;
-        // switching away from current — clear video
         fieldVideoUrl.value = '';
         resetUploadUI();
+        resetServerBrowserUI();
         hidePreviewVideo();
         if (src !== 'youtube') videoFile.value = '';
         setSource(src);
@@ -475,10 +528,8 @@
 
         loadRelatedForItem(item);
 
-        // detect and apply source type
         const vtype = item.video_type || detectVideoType(item.video_url || '');
-        // 'direct' maps to the 'beget' tab in the UI
-        setSource(vtype === 'direct' ? 'beget' : vtype);
+        setSource(vtype === 'direct' ? 'cloudinary' : vtype);
 
         fieldThumbUrl.value = item.thumb_url || '';
 
@@ -538,6 +589,8 @@
         fieldYoutubeUrl.value = '';
         fieldThumbUrl.value   = '';
         resetThumbUI();
+        resetServerBrowserUI();
+        serverFolders = null;
         selectedTags = [];
         selectedRelated = [];
         relatedField.style.display = 'none';
@@ -722,58 +775,128 @@
 
         if (currentSource === 'local') {
             _uploadVideoLocal(file, originalName);
-        } else if (currentSource === 'beget') {
-            _uploadVideoBeget(file, originalName);
         } else {
             _uploadVideoCloudinary(file, originalName);
         }
     }
 
-    function _uploadVideoBeget(file, originalName) {
-        const formData = new FormData();
-        formData.append('video', file);
-
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/dm/upload-video-beget');
-
-        uploadInner.style.display    = 'none';
-        uploadProgress.style.display = '';
-        uploadFill.style.width       = '0%';
-        uploadLabel.textContent      = '0%';
-
-        xhr.upload.addEventListener('progress', e => {
-            if (e.lengthComputable) {
-                const pct = Math.round(e.loaded / e.total * 100);
-                uploadFill.style.width  = pct + '%';
-                uploadLabel.textContent = pct + '%';
-            }
-        });
-
-        xhr.addEventListener('load', () => {
-            try {
-                const data = JSON.parse(xhr.responseText);
-                if (data.url) {
-                    fieldVideoUrl.value  = data.url;
-                    fieldVideoType.value = 'direct';
-                    if (!fieldTitle.value.trim()) { fieldTitle.value = originalName; syncPreviewText(); }
-                    showUploadDone(data.url);
-                    clearPreviewImage();
-                    previewPlaceholder.style.display = 'none';
-                    previewVideo.style.display = 'none';
-                } else {
-                    uploadLabel.textContent = 'Ошибка: ' + (data.error || 'unknown');
-                    resetUploadUI();
-                }
-            } catch { resetUploadUI(); }
-        });
-
-        xhr.addEventListener('error', () => {
-            uploadLabel.textContent = 'Ошибка загрузки';
-            setTimeout(resetUploadUI, 2000);
-        });
-
-        xhr.send(formData);
+    // ── server browser ─────────────────────────────────────────────────────
+    function resetServerBrowserUI() {
+        serverBrowserLoading.style.display = '';
+        serverFolderList.style.display     = 'none';
+        serverFilePanel.style.display      = 'none';
+        serverImportDone.style.display     = 'none';
+        serverFolderSelect.innerHTML       = '<option value="">— выберите папку —</option>';
+        serverVideoSelect.innerHTML        = '<option value="">— выберите файл —</option>';
+        serverThumbSelect.innerHTML        = '<option value="">— авто / нет —</option>';
     }
+
+    async function initServerBrowser() {
+        if (serverFolders !== null) {
+            renderServerFolders();
+            return;
+        }
+        serverBrowserLoading.style.display = '';
+        serverFolderList.style.display     = 'none';
+        serverFilePanel.style.display      = 'none';
+        serverImportDone.style.display     = 'none';
+        try {
+            const res = await fetch('/api/dm/server-videos');
+            serverFolders = await res.json();
+            renderServerFolders();
+        } catch (e) {
+            serverBrowserLoading.textContent = 'Ошибка загрузки: ' + e.message;
+        }
+    }
+
+    function renderServerFolders() {
+        serverBrowserLoading.style.display = 'none';
+        serverFolderSelect.innerHTML = '<option value="">— выберите папку —</option>';
+        (serverFolders || []).forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f.folder;
+            opt.textContent = f.folder + ' (' + f.videos.length + ' видео)';
+            serverFolderSelect.appendChild(opt);
+        });
+        serverFolderList.style.display = '';
+        serverFilePanel.style.display  = 'none';
+        serverImportDone.style.display = 'none';
+    }
+
+    serverFolderSelect.addEventListener('change', () => {
+        const folderName = serverFolderSelect.value;
+        if (!folderName) { serverFilePanel.style.display = 'none'; return; }
+        const folder = (serverFolders || []).find(f => f.folder === folderName);
+        if (!folder) return;
+
+        serverVideoSelect.innerHTML = '<option value="">— выберите файл —</option>';
+        folder.videos.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v; opt.textContent = v;
+            serverVideoSelect.appendChild(opt);
+        });
+        if (folder.videos.length === 1) serverVideoSelect.value = folder.videos[0];
+
+        serverThumbSelect.innerHTML = '<option value="">— авто / нет —</option>';
+        folder.thumbs.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t; opt.textContent = t;
+            serverThumbSelect.appendChild(opt);
+        });
+        if (folder.thumbs.length === 1) serverThumbSelect.value = folder.thumbs[0];
+
+        serverFilePanel.style.display  = '';
+        serverImportDone.style.display = 'none';
+    });
+
+    btnServerImport.addEventListener('click', async () => {
+        const folder = serverFolderSelect.value;
+        const video  = serverVideoSelect.value;
+        if (!folder || !video) { alert('Выберите папку и видео'); return; }
+        btnServerImport.disabled = true;
+        btnServerImport.textContent = 'Копирование...';
+        try {
+            const res = await fetch('/api/dm/import-server-video', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ folder, video, thumb: serverThumbSelect.value }),
+            });
+            const data = await res.json();
+            if (data.url) {
+                fieldVideoUrl.value  = data.url;
+                fieldVideoType.value = 'local';
+                if (data.thumb_url) {
+                    fieldThumbUrl.value = data.thumb_url;
+                    setPreviewImage(data.thumb_url);
+                    thumbField.style.display = '';
+                    showThumbDone(data.thumb_url);
+                }
+                if (!fieldTitle.value.trim()) {
+                    fieldTitle.value = video.replace(/\.[^.]+$/, '');
+                    syncPreviewText();
+                }
+                serverImportDoneText.textContent = folder + '/' + video;
+                serverFilePanel.style.display  = 'none';
+                serverFolderList.style.display = 'none';
+                serverImportDone.style.display = '';
+            } else {
+                alert('Ошибка: ' + (data.error || 'unknown'));
+            }
+        } catch (e) {
+            alert('Ошибка: ' + e.message);
+        } finally {
+            btnServerImport.disabled = false;
+            btnServerImport.textContent = 'Импортировать';
+        }
+    });
+
+    btnServerReimport.addEventListener('click', () => {
+        fieldVideoUrl.value = '';
+        fieldThumbUrl.value = '';
+        resetThumbUI();
+        hidePreviewVideo();
+        renderServerFolders();
+    });
 
     function _uploadVideoLocal(file, originalName) {
         const formData = new FormData();

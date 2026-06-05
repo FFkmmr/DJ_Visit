@@ -10,6 +10,10 @@ main_bp = Blueprint('main', __name__)
 
 DM_PASSWORD = '123'
 PORTFOLIO_DIR = os.environ.get('PORTFOLIO_DIR', '/data/portfolio')
+MOVIES_DIR = os.environ.get('MOVIES_DIR', '/data/movies')
+
+VIDEO_EXTS = {'.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v', '.wmv'}
+IMAGE_EXTS = {'.jpg', '.jpeg', '.png', '.webp', '.svg'}
 
 PREDEFINED_TAGS = ['ad', 'kids', 'art', 'clips', 'backstage', 'reels', 'corp']
 
@@ -401,6 +405,71 @@ def dm_upload_thumb_local():
         return jsonify({'thumb_url': url})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@main_bp.route('/api/dm/server-videos')
+def dm_server_videos():
+    """List folders and video/thumb files inside MOVIES_DIR."""
+    if not session.get('dm_auth'):
+        abort(403)
+    result = []
+    if not os.path.isdir(MOVIES_DIR):
+        return jsonify([])
+    for folder_name in sorted(os.listdir(MOVIES_DIR)):
+        folder_path = os.path.join(MOVIES_DIR, folder_name)
+        if not os.path.isdir(folder_path):
+            continue
+        videos = []
+        thumbs = []
+        for fname in sorted(os.listdir(folder_path)):
+            ext = os.path.splitext(fname)[1].lower()
+            if ext in VIDEO_EXTS:
+                videos.append(fname)
+            elif ext in IMAGE_EXTS:
+                thumbs.append(fname)
+        if videos:
+            result.append({'folder': folder_name, 'videos': videos, 'thumbs': thumbs})
+    return jsonify(result)
+
+
+@main_bp.route('/api/dm/import-server-video', methods=['POST'])
+def dm_import_server_video():
+    """Create a portfolio card from a file already on the server in MOVIES_DIR."""
+    if not session.get('dm_auth'):
+        abort(403)
+    data = request.get_json(force=True)
+    folder = data.get('folder', '').strip()
+    video_file = data.get('video', '').strip()
+    thumb_file = data.get('thumb', '').strip()
+
+    # Sanitise — no path traversal
+    safe_folder = re.sub(r'[^a-zA-Z0-9_\-]', '', folder)
+    safe_video  = re.sub(r'[^a-zA-Z0-9_\-\.]', '', video_file)
+    safe_thumb  = re.sub(r'[^a-zA-Z0-9_\-\.]', '', thumb_file) if thumb_file else ''
+
+    src_video = os.path.join(MOVIES_DIR, safe_folder, safe_video)
+    if not os.path.isfile(src_video):
+        return jsonify({'error': 'Video file not found'}), 404
+
+    new_id = _next_portfolio_id()
+    dest_folder = os.path.join(PORTFOLIO_DIR, new_id)
+    os.makedirs(dest_folder, exist_ok=True)
+
+    import shutil
+    # Always copy as video.mp4 so existing stream route works
+    shutil.copy2(src_video, os.path.join(dest_folder, 'video.mp4'))
+
+    thumb_url = ''
+    if safe_thumb:
+        src_thumb = os.path.join(MOVIES_DIR, safe_folder, safe_thumb)
+        if os.path.isfile(src_thumb):
+            ext = os.path.splitext(safe_thumb)[1].lower()
+            dest_thumb = os.path.join(dest_folder, 'thumb' + ext)
+            shutil.copy2(src_thumb, dest_thumb)
+            thumb_url = '/api/portfolio-thumb/' + new_id
+
+    video_url = '/api/portfolio-video/' + new_id
+    return jsonify({'url': video_url, 'local_id': new_id, 'thumb_url': thumb_url})
 
 
 @main_bp.route('/api/portfolio-thumb/<item_id>')
