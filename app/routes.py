@@ -248,7 +248,17 @@ def portfolio_video_stream(item_id):
     safe_id = re.sub(r'[^a-zA-Z0-9_-]', '', item_id)
     video_path = os.path.join(PORTFOLIO_DIR, safe_id, 'video.mp4')
     if not os.path.isfile(video_path):
-        abort(404)
+        ref_file = os.path.join(PORTFOLIO_DIR, safe_id, 'source_path.txt')
+        if os.path.isfile(ref_file):
+            with open(ref_file, 'r', encoding='utf-8') as f:
+                video_path = f.read().strip()
+        if not os.path.isfile(video_path):
+            abort(404)
+
+    ext = os.path.splitext(video_path)[1].lower()
+    mime_map = {'.mp4': 'video/mp4', '.mov': 'video/quicktime', '.mkv': 'video/x-matroska',
+                '.webm': 'video/webm', '.avi': 'video/x-msvideo', '.m4v': 'video/mp4'}
+    video_mime = mime_map.get(ext, 'video/mp4')
 
     file_size = os.path.getsize(video_path)
     range_header = request.headers.get('Range')
@@ -273,7 +283,7 @@ def portfolio_video_stream(item_id):
                     yield data
 
         resp = Response(stream_with_context(generate()), 206,
-                        mimetype='video/mp4', direct_passthrough=True)
+                        mimetype=video_mime, direct_passthrough=True)
         resp.headers['Content-Range'] = f'bytes {start}-{end}/{file_size}'
         resp.headers['Content-Length'] = length
     else:
@@ -286,7 +296,7 @@ def portfolio_video_stream(item_id):
                     yield data
 
         resp = Response(stream_with_context(generate()), 200,
-                        mimetype='video/mp4', direct_passthrough=True)
+                        mimetype=video_mime, direct_passthrough=True)
         resp.headers['Content-Length'] = file_size
 
     resp.headers['Accept-Ranges'] = 'bytes'
@@ -458,13 +468,10 @@ def dm_import_server_video():
     os.makedirs(dest_folder, exist_ok=True)
 
     import shutil
-    import traceback
-    try:
-        shutil.copy2(src_video, os.path.join(dest_folder, 'video.mp4'))
-    except Exception as e:
-        shutil.rmtree(dest_folder, ignore_errors=True)
-        current_app.logger.error('import-server-video copy failed: %s\n%s', e, traceback.format_exc())
-        return jsonify({'error': 'Copy failed: ' + str(e)}), 500
+    # Store reference to original — no copy needed
+    ref_file = os.path.join(dest_folder, 'source_path.txt')
+    with open(ref_file, 'w', encoding='utf-8') as f:
+        f.write(src_video)
 
     thumb_url = ''
     if safe_thumb:
