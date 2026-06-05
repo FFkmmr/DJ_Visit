@@ -65,6 +65,7 @@
                         <div class="dm-video-source-tabs" id="video-source-tabs">
                             <button type="button" class="dm-source-tab dm-source-tab--active" data-source="cloudinary">Cloudinary</button>
                             <button type="button" class="dm-source-tab" data-source="local">Сервер Railway</button>
+                            <button type="button" class="dm-source-tab" data-source="beget">Beget</button>
                             <button type="button" class="dm-source-tab" data-source="youtube">YouTube</button>
                             <button type="button" class="dm-source-tab" data-source="vimeo">Vimeo</button>
                         </div>
@@ -295,13 +296,16 @@
         if (source === 'local') {
             thumbField.style.display = '';
             document.getElementById('thumb-field-label').textContent = 'Обложка (превью)';
+        } else if (source === 'beget') {
+            thumbField.style.display = '';
+            document.getElementById('thumb-field-label').textContent = 'Обложка (превью)';
         } else if (source !== 'cloudinary') {
             thumbField.style.display = 'none';
         }
 
         if (source !== 'youtube') fieldYoutubeUrl.value = '';
         if (source !== 'vimeo')   fieldVimeoUrl.value   = '';
-        if (source !== 'local') {
+        if (source !== 'local' && source !== 'beget') {
             fieldThumbUrl.value = '';
             resetThumbUI();
         }
@@ -473,7 +477,8 @@
 
         // detect and apply source type
         const vtype = item.video_type || detectVideoType(item.video_url || '');
-        setSource(vtype);
+        // 'direct' maps to the 'beget' tab in the UI
+        setSource(vtype === 'direct' ? 'beget' : vtype);
 
         fieldThumbUrl.value = item.thumb_url || '';
 
@@ -520,6 +525,8 @@
         if (extractYoutubeId(url)) return 'youtube';
         if (extractVimeoId(url))   return 'vimeo';
         if (url.startsWith('/api/portfolio-video/')) return 'local';
+        const lower = url.toLowerCase();
+        if (lower.startsWith('http') && (lower.endsWith('.mp4') || lower.endsWith('.webm'))) return 'direct';
         return 'cloudinary';
     }
 
@@ -715,9 +722,57 @@
 
         if (currentSource === 'local') {
             _uploadVideoLocal(file, originalName);
+        } else if (currentSource === 'beget') {
+            _uploadVideoBeget(file, originalName);
         } else {
             _uploadVideoCloudinary(file, originalName);
         }
+    }
+
+    function _uploadVideoBeget(file, originalName) {
+        const formData = new FormData();
+        formData.append('video', file);
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/dm/upload-video-beget');
+
+        uploadInner.style.display    = 'none';
+        uploadProgress.style.display = '';
+        uploadFill.style.width       = '0%';
+        uploadLabel.textContent      = '0%';
+
+        xhr.upload.addEventListener('progress', e => {
+            if (e.lengthComputable) {
+                const pct = Math.round(e.loaded / e.total * 100);
+                uploadFill.style.width  = pct + '%';
+                uploadLabel.textContent = pct + '%';
+            }
+        });
+
+        xhr.addEventListener('load', () => {
+            try {
+                const data = JSON.parse(xhr.responseText);
+                if (data.url) {
+                    fieldVideoUrl.value  = data.url;
+                    fieldVideoType.value = 'direct';
+                    if (!fieldTitle.value.trim()) { fieldTitle.value = originalName; syncPreviewText(); }
+                    showUploadDone(data.url);
+                    clearPreviewImage();
+                    previewPlaceholder.style.display = 'none';
+                    previewVideo.style.display = 'none';
+                } else {
+                    uploadLabel.textContent = 'Ошибка: ' + (data.error || 'unknown');
+                    resetUploadUI();
+                }
+            } catch { resetUploadUI(); }
+        });
+
+        xhr.addEventListener('error', () => {
+            uploadLabel.textContent = 'Ошибка загрузки';
+            setTimeout(resetUploadUI, 2000);
+        });
+
+        xhr.send(formData);
     }
 
     function _uploadVideoLocal(file, originalName) {
@@ -876,7 +931,7 @@
             description: fieldDesc.value.trim(),
             tags:        selectedTags,
             video_url:   videoUrl,
-            video_type:  currentSource,
+            video_type:  currentSource === 'beget' ? 'direct' : currentSource,
             thumb_url:   currentSource === 'youtube' ? '' : (thumbUrl || videoUrl),
         };
 

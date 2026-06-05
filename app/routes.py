@@ -66,6 +66,9 @@ def _detect_video_type(video_url):
         return 'vimeo'
     if video_url.startswith('/api/portfolio-video/'):
         return 'local'
+    lower = video_url.lower()
+    if lower.startswith('http') and (lower.endswith('.mp4') or lower.endswith('.webm')):
+        return 'direct'
     return 'cloudinary'
 
 
@@ -305,6 +308,46 @@ def dm_upload_video_local():
         return jsonify({'url': url, 'local_id': new_id})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@main_bp.route('/api/dm/upload-video-beget', methods=['POST'])
+def dm_upload_video_beget():
+    """Upload video to Beget via SFTP, return direct HTTP URL."""
+    if not session.get('dm_auth'):
+        abort(403)
+    f = request.files.get('video')
+    if not f:
+        return jsonify({'error': 'No file'}), 400
+
+    host     = os.environ.get('BEGET_HOST')
+    user     = os.environ.get('BEGET_USER')
+    password = os.environ.get('BEGET_PASSWORD')
+    media_dir = os.environ.get('BEGET_MEDIA_DIR')
+    media_url = os.environ.get('BEGET_MEDIA_URL', '').rstrip('/')
+
+    if not all([host, user, password, media_dir]):
+        return jsonify({'error': 'Beget SFTP not configured'}), 500
+
+    import uuid
+    import paramiko
+
+    new_id  = uuid.uuid4().hex
+    remote_name = new_id + '.mp4'
+    remote_path = media_dir.rstrip('/') + '/' + remote_name
+
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(host, username=user, password=password, timeout=30)
+        sftp = ssh.open_sftp()
+        sftp.putfo(f.stream, remote_path)
+        sftp.close()
+        ssh.close()
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    url = media_url + '/' + remote_name
+    return jsonify({'url': url, 'video_type': 'direct'})
 
 
 @main_bp.route('/api/dm/upload-thumb-cloudinary', methods=['POST'])
