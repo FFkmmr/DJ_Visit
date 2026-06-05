@@ -458,8 +458,13 @@ def dm_import_server_video():
     os.makedirs(dest_folder, exist_ok=True)
 
     import shutil
-    # Always copy as video.mp4 so existing stream route works
-    shutil.copy2(src_video, os.path.join(dest_folder, 'video.mp4'))
+    import traceback
+    try:
+        shutil.copy2(src_video, os.path.join(dest_folder, 'video.mp4'))
+    except Exception as e:
+        shutil.rmtree(dest_folder, ignore_errors=True)
+        current_app.logger.error('import-server-video copy failed: %s\n%s', e, traceback.format_exc())
+        return jsonify({'error': 'Copy failed: ' + str(e)}), 500
 
     thumb_url = ''
     if safe_thumb:
@@ -467,8 +472,11 @@ def dm_import_server_video():
         if os.path.isfile(src_thumb):
             ext = os.path.splitext(safe_thumb)[1].lower()
             dest_thumb = os.path.join(dest_folder, 'thumb' + ext)
-            shutil.copy2(src_thumb, dest_thumb)
-            thumb_url = '/api/portfolio-thumb/' + new_id
+            try:
+                shutil.copy2(src_thumb, dest_thumb)
+                thumb_url = '/api/portfolio-thumb/' + new_id
+            except Exception as e:
+                current_app.logger.error('import-server-video thumb copy failed: %s', e)
 
     video_url = '/api/portfolio-video/' + new_id
     return jsonify({'url': video_url, 'local_id': new_id, 'thumb_url': thumb_url})
