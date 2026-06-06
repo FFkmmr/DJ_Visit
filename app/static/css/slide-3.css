@@ -106,7 +106,10 @@
 }
 
 @media (max-width: 1920px) {
-  .slide-3__grid--single { grid-template-columns: minmax(0, 1282px); max-width: 1302px; }
+  .slide-3__grid--single {
+    grid-template-columns: minmax(0, 1282px);
+    max-width: 1302px;
+  }
 }
 
 @media (max-width: 1440px) {
@@ -464,6 +467,11 @@
     grid-template-columns: repeat(2, 1fr);
     max-width: 1200px;
     gap: 24px;
+  }
+
+  .slide-3__grid--single {
+    grid-template-columns: 1fr;
+    max-width: 900px;
   }
 }
 
