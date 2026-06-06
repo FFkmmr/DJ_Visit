@@ -5,7 +5,9 @@ import json
 import cloudinary
 import cloudinary.uploader
 from config import CLOUDINARY_VIDEOS
-from app.extensions import limiter, csrf
+from app.extensions import limiter
+from flask_wtf.csrf import validate_csrf
+from wtforms import ValidationError
 
 main_bp = Blueprint('main', __name__)
 
@@ -269,11 +271,14 @@ def robots_txt():
 
 @main_bp.route('/dm', methods=['GET', 'POST'], strict_slashes=False)
 @limiter.limit('5 per minute', methods=['POST'])
-@csrf.protect
 def dm():
     if not session.get('dm_auth'):
         error = None
         if request.method == 'POST':
+            try:
+                validate_csrf(request.form.get('csrf_token'))
+            except ValidationError:
+                abort(400)
             if request.form.get('password') == DM_PASSWORD:
                 session['dm_auth'] = True
                 return redirect(url_for('main.dm'))
