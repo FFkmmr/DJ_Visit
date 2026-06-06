@@ -30,6 +30,7 @@ class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
     TESTING = False
+    SECRET_KEY = os.environ['SECRET_KEY']  # fails at startup if not set — intentional
 
 
 def get_config():

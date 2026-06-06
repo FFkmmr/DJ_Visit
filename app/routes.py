@@ -5,10 +5,11 @@ import json
 import cloudinary
 import cloudinary.uploader
 from config import CLOUDINARY_VIDEOS
+from app.extensions import limiter, csrf
 
 main_bp = Blueprint('main', __name__)
 
-DM_PASSWORD = '123'
+DM_PASSWORD = os.environ.get('DM_PASSWORD', '')
 PORTFOLIO_DIR = os.environ.get('PORTFOLIO_DIR', '/data/portfolio')
 MOVIES_DIR = os.environ.get('MOVIES_DIR', '/data/movies')
 
@@ -258,7 +259,17 @@ def portfolio_api():
 
 # ── /dm admin ──────────────────────────────────────────────────────────────────
 
+@main_bp.route('/robots.txt')
+def robots_txt():
+    return current_app.response_class(
+        'User-agent: *\nDisallow: /dm\nDisallow: /dm/\n',
+        mimetype='text/plain'
+    )
+
+
 @main_bp.route('/dm', methods=['GET', 'POST'], strict_slashes=False)
+@limiter.limit('5 per minute', methods=['POST'])
+@csrf.protect
 def dm():
     if not session.get('dm_auth'):
         error = None

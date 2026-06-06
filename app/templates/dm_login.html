@@ -14,6 +14,7 @@
     <div class="dm-login">
         <h1 class="dm-login__title">DM</h1>
         <form class="dm-login__form" method="POST" action="{{ url_for('main.dm') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input
                 class="dm-input dm-login__input"
                 type="password"

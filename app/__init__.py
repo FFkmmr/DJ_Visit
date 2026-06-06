@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 from config import get_config
+from app.extensions import limiter, csrf
 
 
 def create_app():
@@ -18,6 +19,11 @@ def create_app():
 
     # Allow large video uploads (up to 2 GB)
     app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 * 1024
+
+    # CSRF only on the login form; JSON API endpoints are session-protected
+    app.config['WTF_CSRF_CHECK_DEFAULT'] = False
+    limiter.init_app(app)
+    csrf.init_app(app)
 
     # Register routes
     from app.routes import main_bp

@@ -3,3 +3,5 @@ python-dotenv==1.0.0
 gunicorn==21.2.0
 cloudinary==1.44.2
 paramiko==3.5.0
+flask-limiter==3.8.0
+flask-wtf==1.2.1
