@@ -76,7 +76,26 @@ def _detect_video_type(video_url):
     return 'cloudinary'
 
 
-ORDER_FILE = os.path.join(PORTFOLIO_DIR, 'order.json') if PORTFOLIO_DIR else None
+ORDER_FILE    = os.path.join(PORTFOLIO_DIR, 'order.json') if PORTFOLIO_DIR else None
+SETTINGS_FILE = os.path.join(PORTFOLIO_DIR, 'settings.json') if PORTFOLIO_DIR else None
+
+
+def _load_settings():
+    if SETTINGS_FILE and os.path.isfile(SETTINGS_FILE):
+        try:
+            with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {'autoplay': True, 'columns': 2}
+
+
+def _save_settings(s):
+    if not SETTINGS_FILE:
+        return
+    os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
+    with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(s, f, ensure_ascii=False)
 
 
 def _load_order():
@@ -170,7 +189,29 @@ def _next_portfolio_id():
 
 @main_bp.route('/')
 def index():
-    return render_template('index.html', videos=CLOUDINARY_VIDEOS)
+    settings = _load_settings()
+    return render_template('index.html', videos=CLOUDINARY_VIDEOS, settings=settings)
+
+
+@main_bp.route('/api/dm/site-settings', methods=['GET'])
+def dm_site_settings_get():
+    if not session.get('dm_auth'):
+        abort(403)
+    return jsonify(_load_settings())
+
+
+@main_bp.route('/api/dm/site-settings', methods=['POST'])
+def dm_site_settings_save():
+    if not session.get('dm_auth'):
+        abort(403)
+    data = request.get_json(force=True)
+    s = _load_settings()
+    if 'autoplay' in data:
+        s['autoplay'] = bool(data['autoplay'])
+    if 'columns' in data:
+        s['columns'] = int(data['columns'])
+    _save_settings(s)
+    return jsonify(s)
 
 
 @main_bp.route('/api/portfolio')

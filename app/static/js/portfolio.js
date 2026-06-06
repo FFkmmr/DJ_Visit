@@ -14,6 +14,9 @@ var Portfolio = (function () {
   var hasMore = false;
   var modalIndex = 0;
 
+  var siteAutoplay = true;
+  var siteColumns  = 2;
+
   var grid, filtersEl, loadMoreBtn, emptyEl;
   var modalEl, modalOverlay, modalClose, modalPrev, modalNext, modalPrevM, modalNextM, modalCloseM;
   var modalVideo, modalIframe, modalVideoWrap, modalTitle, modalSubtitle, modalTags, modalDesc;
@@ -121,7 +124,7 @@ var Portfolio = (function () {
       img.alt = escapeHtml(item.title);
       img.loading = 'lazy';
       wrap.appendChild(img);
-    } else if (item.video_url) {
+    } else if (item.video_url && siteAutoplay) {
       var vid = document.createElement('video');
       vid.className = 'portfolio-card__video';
       vid.src = item.video_url;
@@ -131,10 +134,10 @@ var Portfolio = (function () {
       vid.setAttribute('preload', 'none');
       wrap.appendChild(vid);
       observer.observe(vid);
-    } else if (item.thumbnail) {
+    } else if (item.thumbnail || item.video_url) {
       var img = document.createElement('img');
       img.className = 'portfolio-card__img';
-      img.src = item.thumbnail;
+      img.src = item.thumbnail || '';
       img.alt = escapeHtml(item.title);
       img.loading = 'lazy';
       wrap.appendChild(img);
@@ -450,6 +453,12 @@ var Portfolio = (function () {
     filtersEl  = document.getElementById('portfolio-filters');
     loadMoreBtn= document.getElementById('load-more-btn');
     emptyEl    = document.getElementById('portfolio-empty');
+
+    if (grid) {
+      siteAutoplay = grid.dataset.autoplay !== 'false';
+      siteColumns  = parseInt(grid.dataset.columns) || 2;
+      if (siteColumns === 1) grid.classList.add('slide-3__grid--single');
+    }
 
     modalEl       = document.getElementById('pf-modal');
     modalOverlay  = document.getElementById('pf-modal-overlay');

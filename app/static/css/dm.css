@@ -661,6 +661,41 @@
   color: #fff;
 }
 
+.dm-site-settings {
+  margin: 12px 16px 0;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+}
+
+.dm-site-settings__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.dm-site-settings__cb {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent, #ff6b00);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.dm-site-settings__label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+}
+
+.dm-site-settings__status {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  margin: 4px 0 0;
+  min-height: 14px;
+}
+
 .dm-order-panel {
   padding: 40px 48px;
   max-width: 860px;

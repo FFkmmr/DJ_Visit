@@ -22,6 +22,18 @@
         </div>
         <button class="dm-btn dm-btn--primary dm-sidebar__new" id="btn-new">+ Новая карточка</button>
         <button class="dm-btn dm-sidebar__order-btn" id="btn-order">⇅ Порядок карточек</button>
+
+        <div class="dm-site-settings">
+            <label class="dm-site-settings__item">
+                <input type="checkbox" id="setting-autoplay" class="dm-site-settings__cb">
+                <span class="dm-site-settings__label">Автовоспроизведение</span>
+            </label>
+            <label class="dm-site-settings__item">
+                <input type="checkbox" id="setting-columns2" class="dm-site-settings__cb">
+                <span class="dm-site-settings__label">2 столбика</span>
+            </label>
+            <p class="dm-site-settings__status" id="settings-status"></p>
+        </div>
         <ul class="dm-item-list" id="item-list">
             {% for item in items %}
             <li class="dm-item-list__item" data-id="{{ item.id }}" data-item='{{ item | tojson }}'>
@@ -1341,6 +1353,40 @@
     }
 
     btnOrder.addEventListener('click', openOrderPanel);
+
+    // ── site settings ──────────────────────────────────────────────────────
+    const cbAutoplay  = document.getElementById('setting-autoplay');
+    const cbColumns2  = document.getElementById('setting-columns2');
+    const settingsSt  = document.getElementById('settings-status');
+
+    async function loadSiteSettings() {
+        try {
+            const res = await fetch('/api/dm/site-settings');
+            const s = await res.json();
+            cbAutoplay.checked = !!s.autoplay;
+            cbColumns2.checked = s.columns === 2;
+        } catch (e) {}
+    }
+
+    async function saveSiteSettings() {
+        settingsSt.textContent = '...';
+        try {
+            const res = await fetch('/api/dm/site-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ autoplay: cbAutoplay.checked, columns: cbColumns2.checked ? 2 : 1 }),
+            });
+            if (!res.ok) throw new Error();
+            settingsSt.textContent = 'Сохранено ✓';
+            setTimeout(() => { settingsSt.textContent = ''; }, 2000);
+        } catch (e) {
+            settingsSt.textContent = 'Ошибка';
+        }
+    }
+
+    cbAutoplay.addEventListener('change', saveSiteSettings);
+    cbColumns2.addEventListener('change', saveSiteSettings);
+    loadSiteSettings();
 
     btnSaveOrder.addEventListener('click', async () => {
         const order = [...orderList.querySelectorAll('.dm-order-item')].map(el => el.dataset.id);

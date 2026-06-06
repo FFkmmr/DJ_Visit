@@ -10,7 +10,9 @@
     </div>
 
     <!-- Grid (populated by JS) -->
-    <div class="slide-3__grid" id="portfolio-grid"></div>
+    <div class="slide-3__grid" id="portfolio-grid"
+         data-autoplay="{{ 'true' if settings.autoplay else 'false' }}"
+         data-columns="{{ settings.columns }}"></div>
 
     <!-- Empty state -->
     <p class="slide-3__empty" id="portfolio-empty" hidden>
