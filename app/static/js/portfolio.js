@@ -89,6 +89,7 @@ var Portfolio = (function () {
       btn.classList.toggle('filter-btn--active', btn.dataset.filter === category);
     });
     applyFilter(category);
+    rebuildModalIds();
   }
 
   // ── build card ─────────────────────────────────────────────────────────
@@ -179,6 +180,19 @@ var Portfolio = (function () {
     });
   }
 
+  // Full list for modal navigation — all items matching current filter, regardless of pagination
+  var modalIds = [];
+
+  function rebuildModalIds() {
+    modalIds = allItems
+      .filter(function (item) {
+        if (currentCategory === 'all') return true;
+        var cats = Array.isArray(item.categories) ? item.categories : (item.category ? [item.category] : []);
+        return cats.indexOf(currentCategory) !== -1 || item.category === currentCategory;
+      })
+      .map(function (item) { return item.id; });
+  }
+
   // ── filter ─────────────────────────────────────────────────────────────
   function applyFilter(category) {
     grid.querySelectorAll('.portfolio-card').forEach(function (card) {
@@ -240,6 +254,7 @@ var Portfolio = (function () {
         }
       });
       syncFilters();
+      rebuildModalIds();
     } catch (e) {}
   }
 
@@ -255,8 +270,8 @@ var Portfolio = (function () {
       showModalItem(preloadedItem);
       return;
     }
-    rebuildVisibleIds();
-    var idx = visibleIds.indexOf(itemId);
+    rebuildModalIds();
+    var idx = modalIds.indexOf(itemId);
     showModalAt(idx === -1 ? 0 : idx);
   }
 
@@ -272,13 +287,13 @@ var Portfolio = (function () {
     if (!modalEl) return;
     modalIndex = idx;
 
-    var item = allItems.find(function (i) { return i.id === visibleIds[idx]; });
+    var item = allItems.find(function (i) { return i.id === modalIds[idx]; });
     if (!item) return;
 
     populateModal(item);
 
     var isFirst = idx === 0;
-    var isLast  = idx === visibleIds.length - 1;
+    var isLast  = idx === modalIds.length - 1;
     modalPrev.disabled = isFirst;
     modalNext.disabled = isLast;
     if (modalPrevM) modalPrevM.disabled = isFirst;
@@ -523,7 +538,7 @@ var Portfolio = (function () {
       if (modalIndex > 0) showModalAt(modalIndex - 1);
     });
     if (modalNext)    modalNext.addEventListener('click', function () {
-      if (modalIndex < visibleIds.length - 1) showModalAt(modalIndex + 1);
+      if (modalIndex < modalIds.length - 1) showModalAt(modalIndex + 1);
     });
     if (modalPrevM)   modalPrevM.addEventListener('click', function () {
       if (modalIndex > 0) showModalAt(modalIndex - 1);
