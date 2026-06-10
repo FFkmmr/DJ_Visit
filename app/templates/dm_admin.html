@@ -191,6 +191,10 @@
                     <!-- Description -->
                     <div class="dm-field">
                         <label class="dm-label" for="field-description">Описание</label>
+                        <div class="dm-fmt-toolbar">
+                            <button type="button" class="dm-fmt-btn" data-fmt="bold" title="Жирный"><b>B</b></button>
+                            <button type="button" class="dm-fmt-btn dm-fmt-btn--yellow" data-fmt="yellow" title="Жёлтый (#FFBB00)">A</button>
+                        </div>
                         <textarea class="dm-input dm-textarea dm-textarea--tall" id="field-description" rows="4" placeholder="Съёмка, монтаж, постпродакшн..."></textarea>
                     </div>
 
@@ -304,6 +308,25 @@
     const fieldTitle    = document.getElementById('field-title');
     const fieldSub      = document.getElementById('field-subtitle');
     const fieldDesc     = document.getElementById('field-description');
+
+    // ── description formatting toolbar ────────────────────────────────────
+    document.querySelectorAll('.dm-fmt-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var start = fieldDesc.selectionStart;
+        var end   = fieldDesc.selectionEnd;
+        var sel   = fieldDesc.value.slice(start, end);
+        var open, close;
+        if (btn.dataset.fmt === 'bold') {
+          open = '<b>'; close = '</b>';
+        } else {
+          open = '<span style="color:#FFBB00">'; close = '</span>';
+        }
+        var replacement = open + sel + close;
+        fieldDesc.setRangeText(replacement, start, end, 'select');
+        fieldDesc.focus();
+      });
+    });
+
     const fieldVideoUrl  = document.getElementById('field-video-url');
     const fieldThumbUrl  = document.getElementById('field-thumb-url');
     const fieldVideoType = document.getElementById('field-video-type');

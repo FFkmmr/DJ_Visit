@@ -20,8 +20,7 @@ var Portfolio = (function () {
   var grid, filtersEl, loadMoreBtn, emptyEl;
   var modalEl, modalOverlay, modalClose, modalPrev, modalNext, modalPrevM, modalNextM, modalCloseM;
   var modalVideo, modalIframe, modalVideoWrap, modalTitle, modalSubtitle, modalTags, modalDesc;
-  var relatedEl, relatedTrack, relatedPrev, relatedNext;
-  var RELATED_SCROLL_ITEMS = 3; // how many to scroll per arrow click
+  var relatedEl, relatedTrack;
 
   // ── autoplay observer ──────────────────────────────────────────────────
   var observer = new IntersectionObserver(function (entries) {
@@ -308,7 +307,7 @@ var Portfolio = (function () {
 
     modalTitle.textContent    = item.title || '';
     modalSubtitle.textContent = item.subtitle || '';
-    modalDesc.textContent     = item.description || '';
+    modalDesc.innerHTML       = item.description || '';
 
     modalTags.innerHTML = '';
     var tags = Array.isArray(item.tags) ? item.tags : (item.tag ? [item.tag] : []);
@@ -433,15 +432,8 @@ var Portfolio = (function () {
       if (anyVisible) {
         relatedEl.removeAttribute('hidden');
         relatedTrack.scrollLeft = 0;
-        updateRelatedArrows();
       }
     });
-  }
-
-  function updateRelatedArrows() {
-    if (!relatedTrack || !relatedPrev || !relatedNext) return;
-    relatedPrev.disabled = relatedTrack.scrollLeft <= 0;
-    relatedNext.disabled = relatedTrack.scrollLeft + relatedTrack.clientWidth >= relatedTrack.scrollWidth - 1;
   }
 
   function closeModal() {
@@ -488,8 +480,6 @@ var Portfolio = (function () {
     modalIframe    = null;
     relatedEl      = document.getElementById('pf-modal-related');
     relatedTrack   = document.getElementById('pf-related-track');
-    relatedPrev    = document.getElementById('pf-related-prev');
-    relatedNext    = document.getElementById('pf-related-next');
     modalTitle    = document.getElementById('pf-modal-title');
     modalSubtitle = document.getElementById('pf-modal-subtitle');
     modalTags     = document.getElementById('pf-modal-tags');
@@ -516,20 +506,6 @@ var Portfolio = (function () {
         loadPage(currentPage, true);
       });
     }
-
-    if (relatedPrev) relatedPrev.addEventListener('click', function () {
-      var itemW = relatedTrack.querySelector('.pf-modal__related-item');
-      var step  = itemW ? itemW.offsetWidth * RELATED_SCROLL_ITEMS : 300;
-      relatedTrack.scrollBy({ left: -step, behavior: 'smooth' });
-      setTimeout(updateRelatedArrows, 350);
-    });
-    if (relatedNext) relatedNext.addEventListener('click', function () {
-      var itemW = relatedTrack.querySelector('.pf-modal__related-item');
-      var step  = itemW ? itemW.offsetWidth * RELATED_SCROLL_ITEMS : 300;
-      relatedTrack.scrollBy({ left: step, behavior: 'smooth' });
-      setTimeout(updateRelatedArrows, 350);
-    });
-    if (relatedTrack) relatedTrack.addEventListener('scroll', updateRelatedArrows);
 
     if (modalOverlay) modalOverlay.addEventListener('click', closeModal);
     if (modalClose)   modalClose.addEventListener('click', closeModal);

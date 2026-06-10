@@ -80,6 +80,37 @@
   min-height: 120px;
 }
 
+.dm-fmt-toolbar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.dm-fmt-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  border: 1px solid #444;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms;
+}
+
+.dm-fmt-btn:hover {
+  background: #2a2a2a;
+}
+
+.dm-fmt-btn--yellow {
+  color: #FFBB00;
+  font-weight: 700;
+  font-size: 15px;
+}
+
 .dm-btn {
   display: inline-flex;
   align-items: center;

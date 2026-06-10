@@ -1,3 +1,17 @@
+cd /root/DJ_Visit && git pull
+docker stop dj_visit && docker rm dj_visit
+docker build -t dj_visit .
+docker run -d \
+  --name dj_visit \
+  --restart always \
+  --env-file /root/DJ_Visit/.env \
+  -e PORTFOLIO_DIR=/data/portfolio \
+  -p 8080:8080 \
+  -v /data:/data \
+  dj_visit
+
+
+
 ### Визитка состоит из 7 компонентов:
 - Хедер
 - слайд 1
