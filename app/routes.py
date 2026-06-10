@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, jsonify, request, session, redirect, url_for, abort, send_file, current_app
+from flask import Blueprint, render_template, jsonify, request, session, redirect, url_for, abort, send_file, send_from_directory, current_app
 import os
 import re
 import json
@@ -551,10 +551,16 @@ def portfolio_thumb_stream(item_id):
     """Serve locally stored thumbnail from Railway /data volume."""
     safe_id = re.sub(r'[^a-zA-Z0-9_-]', '', item_id)
     folder = os.path.join(PORTFOLIO_DIR, safe_id)
+    mime_map = {'.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp'}
     for ext in ('.jpg', '.jpeg', '.png', '.webp'):
-        p = os.path.join(folder, 'thumb' + ext)
+        filename = 'thumb' + ext
+        p = os.path.join(folder, filename)
         if os.path.isfile(p):
-            return send_file(p)
+            try:
+                return send_from_directory(os.path.abspath(folder), filename, mimetype=mime_map[ext])
+            except Exception as e:
+                current_app.logger.error('portfolio_thumb_stream error for %s: %s', p, e)
+                abort(500)
     abort(404)
 
 
